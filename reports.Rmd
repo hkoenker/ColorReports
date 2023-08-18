@@ -1,0 +1,23 @@
+---
+title: "Reports"
+description: |
+  Reports are limited to Malaria Indicator Surveys or Demographic and Health Surveys for countries where data on net color and/or net color preference were collected. They are available in English and in French. 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# Reports
+
+- [Kenya](files/Kenya_Color_Report.html)
+- [Liberia](files/Liberia_Color_Report.html)
+- [Madagascar](files/Madagascar_Color_Report.html)
+- [Malawi](files/Malawi_Color_Report.html)
+- [Mozambique](files/Mozambique_Color_Report.html)
+- [Nigeria](files/Nigeria_Color_Report.html)
+- [Rwanda](files/Rwanda_Color_Report.html)
+- [Sierra Leone](files/Sierra_Leone_Color_Report.html)
+- [Tanzania](files/Tanzania_Color_Report.html)
+
+

@@ -1,0 +1,13 @@
+---
+title: "About this site"
+description: |
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+This site was built by Hannah Koenker, Technical Director at Tropical Health. Both Stata and R were used for analysis and presentation of the findings. Feedback and questions are welcome! You can reach me at hannah AT trophealth DOT com.
+
+<h1>Methods</h1>
+Publicly available datasets were downloaded from dhsprogram.com. Datasets were scanned and those containing information on net color and/or preferences for net color were retained. Appropriate survey weights were applied using the "svy" command in Stata and/or the "survey" package in R. Regression results for the results on the homepage were run with the svy: logistic command in Stata.
