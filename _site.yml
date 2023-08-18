@@ -1,0 +1,17 @@
+name: "ColorReports"
+title: "Color Reports"
+theme: bespoke-theme.css
+description: |
+  Color Reports
+output_dir: "docs"
+navbar:
+  right:
+    - text: "Home"
+      href: index.html
+    - text: "About"
+      href: about.html
+    - text: "Reports"
+      href: reports.html
+    - icon: fab fa-github
+      href: https://github.com/hkoenker/Color
+output: distill::distill_article
