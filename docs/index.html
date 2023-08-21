@@ -50,17 +50,16 @@ pre.numberSource code > span > a:first-child::before
   }
 pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
 div.sourceCode
-  { color: #00769e; background-color: #f1f3f5; }
+  {   }
 @media screen {
 pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
-code span { color: #00769e; } /* Normal */
 code span.al { color: #ad0000; } /* Alert */
 code span.an { color: #5e5e5e; } /* Annotation */
-code span.at { color: #657422; } /* Attribute */
+code span.at { } /* Attribute */
 code span.bn { color: #ad0000; } /* BaseN */
 code span.bu { } /* BuiltIn */
-code span.cf { color: #00769e; } /* ControlFlow */
+code span.cf { color: #007ba5; } /* ControlFlow */
 code span.ch { color: #20794d; } /* Char */
 code span.cn { color: #8f5902; } /* Constant */
 code span.co { color: #5e5e5e; } /* Comment */
@@ -74,9 +73,9 @@ code span.fl { color: #ad0000; } /* Float */
 code span.fu { color: #4758ab; } /* Function */
 code span.im { } /* Import */
 code span.in { color: #5e5e5e; } /* Information */
-code span.kw { color: #00769e; } /* Keyword */
+code span.kw { color: #007ba5; } /* Keyword */
 code span.op { color: #5e5e5e; } /* Operator */
-code span.ot { color: #00769e; } /* Other */
+code span.ot { color: #007ba5; } /* Other */
 code span.pp { color: #ad0000; } /* Preprocessor */
 code span.sc { color: #5e5e5e; } /* SpecialChar */
 code span.ss { color: #20794d; } /* SpecialString */
@@ -90,27 +89,27 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <!--radix_placeholder_meta_tags-->
   <title>Color Reports: ITN Color vs ITN Use</title>
 
-  <meta property="description" itemprop="description" content="Does the color of an ITN make a difference in the overall use rate? &lt;br&gt;  Last update: 18 August, 2023"/>
+  <meta property="description" itemprop="description" content="Does the color of an ITN make a difference in the overall use rate? &lt;br&gt;  Last update: 19 August, 2023"/>
 
 
 
   <!--  https://developers.facebook.com/docs/sharing/webmasters#markup -->
   <meta property="og:title" content="Color Reports: ITN Color vs ITN Use"/>
   <meta property="og:type" content="article"/>
-  <meta property="og:description" content="Does the color of an ITN make a difference in the overall use rate? &lt;br&gt;  Last update: 18 August, 2023"/>
+  <meta property="og:description" content="Does the color of an ITN make a difference in the overall use rate? &lt;br&gt;  Last update: 19 August, 2023"/>
   <meta property="og:locale" content="en_US"/>
   <meta property="og:site_name" content="Color Reports"/>
 
   <!--  https://dev.twitter.com/cards/types/summary -->
   <meta property="twitter:card" content="summary"/>
   <meta property="twitter:title" content="Color Reports: ITN Color vs ITN Use"/>
-  <meta property="twitter:description" content="Does the color of an ITN make a difference in the overall use rate? &lt;br&gt;  Last update: 18 August, 2023"/>
+  <meta property="twitter:description" content="Does the color of an ITN make a difference in the overall use rate? &lt;br&gt;  Last update: 19 August, 2023"/>
 
   <!--/radix_placeholder_meta_tags-->
   <!--radix_placeholder_rmarkdown_metadata-->
 
   <script type="text/json" id="radix-rmarkdown-metadata">
-  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","site","editor_options"]}},"value":[{"type":"character","attributes":{},"value":["ITN Color vs ITN Use"]},{"type":"character","attributes":{},"value":["Does the color of an ITN make a difference in the overall use rate? <br>  Last update: 18 August, 2023\n"]},{"type":"character","attributes":{},"value":["distill::distill_website"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["chunk_output_type"]}},"value":[{"type":"character","attributes":{},"value":["console"]}]}]}
+  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","site","editor_options"]}},"value":[{"type":"character","attributes":{},"value":["ITN Color vs ITN Use"]},{"type":"character","attributes":{},"value":["Does the color of an ITN make a difference in the overall use rate? <br>  Last update: 19 August, 2023\n"]},{"type":"character","attributes":{},"value":["distill::distill_website"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["chunk_output_type"]}},"value":[{"type":"character","attributes":{},"value":["console"]}]}]}
   </script>
   <!--/radix_placeholder_rmarkdown_metadata-->
   <!--radix_placeholder_navigation_in_header-->
@@ -788,7 +787,6 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   d-article table.gt_table td,
   d-article table.gt_table th {
     border-bottom: none;
-    font-size: 100%;
   }
 
   .html-widget {
@@ -1030,6 +1028,10 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     position: relative;
     margin-bottom: 2.5em;
     margin-top: 1.5em;
+  }
+
+  .figure img {
+    width: 100%;
   }
 
   .figure .caption {
@@ -1861,21 +1863,9 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
       // hoverable references
       $('span.citation[data-cites]').each(function() {
-        const citeChild = $(this).children()[0]
-        // Do not process if @xyz has been used without escaping and without bibliography activated
-        // https://github.com/rstudio/distill/issues/466
-        if (citeChild === undefined) return true
-
-        if (citeChild.nodeName == "D-FOOTNOTE") {
-          var fn = citeChild
-          $(this).html(fn.shadowRoot.querySelector("sup"))
-          $(this).id = fn.id
-          fn.remove()
-        }
         var refs = $(this).attr('data-cites').split(" ");
         var refHtml = refs.map(function(ref) {
-          // Could use CSS.escape too here, we insure backward compatibility in navigator
-          return "<p>" + $('div[id="ref-' + ref + '"]').html() + "</p>";
+          return "<p>" + $('#ref-' + ref).html() + "</p>";
         }).join("\n");
         window.tippy(this, {
           allowHTML: true,
@@ -1887,31 +1877,6 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
           placement: 'bottom-start'
         });
       });
-
-      // fix footnotes in tables (#411)
-      // replacing broken distill.pub feature
-      $('table d-footnote').each(function() {
-        // we replace internal showAtNode methode which is triggered when hovering a footnote
-        this.hoverBox.showAtNode = function(node) {
-          // ported from https://github.com/distillpub/template/pull/105/files
-          calcOffset = function(elem) {
-              let x = elem.offsetLeft;
-              let y = elem.offsetTop;
-              // Traverse upwards until an `absolute` element is found or `elem`
-              // becomes null.
-              while (elem = elem.offsetParent && elem.style.position != 'absolute') {
-                  x += elem.offsetLeft;
-                  y += elem.offsetTop;
-              }
-
-              return { left: x, top: y };
-          }
-          // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/offsetTop
-          const bbox = node.getBoundingClientRect();
-          const offset = calcOffset(node);
-          this.show([offset.left + bbox.width, offset.top + bbox.height]);
-        }
-      })
 
       // clear polling timer
       clearInterval(tid);
@@ -2011,8 +1976,6 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     // mark non-body figures created by knitr chunks as 100% width
     $('.layout-chunk').each(function(i, val) {
       var figures = $(this).find('img, .html-widget');
-      // ignore leaflet img layers (#106)
-      figures = figures.filter(':not(img[class*="leaflet"])')
       if ($(this).attr('data-layout') !== "l-body") {
         figures.css('width', '100%');
       } else {
@@ -2035,7 +1998,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
     // get rid of index.html references in header
     if (window.location.protocol !== "file:") {
       $('.distill-site-header a[href]').each(function(i,val) {
-        $(this).attr('href', $(this).attr('href').replace(/^index[.]html/, "./"));
+        $(this).attr('href', $(this).attr('href').replace("index.html", "./"));
       });
     }
 
@@ -2404,7 +2367,7 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <!--radix_placeholder_front_matter-->
 
 <script id="distill-front-matter" type="text/json">
-{"title":"ITN Color vs ITN Use","description":"Does the color of an ITN make a difference in the overall use rate? <br>  Last update: 18 August, 2023","authors":[]}
+{"title":"ITN Color vs ITN Use","description":"Does the color of an ITN make a difference in the overall use rate? <br>  Last update: 19 August, 2023","authors":[]}
 </script>
 
 <!--/radix_placeholder_front_matter-->
@@ -2433,15 +2396,31 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <h1>ITN Color vs ITN Use</h1>
 <!--radix_placeholder_categories-->
 <!--/radix_placeholder_categories-->
-<p><p>Does the color of an ITN make a difference in the overall use rate? <br> Last update: 18 August, 2023</p></p>
+<p><p>Does the color of an ITN make a difference in the overall use
+rate? <br> Last update: 19 August, 2023</p></p>
 </div>
 
 
 <div class="d-article">
-<p>This website provides <a href="reports.html">reports</a> for countries in sub-Saharan Africa to evaluate whether there are differences in use of insecticide-treated nets (ITNs) due to the color of ITNs (typically white, blue, green, or other colors).</p>
-<p>Some countries may wish to procure ITNs of a particular color, or procure different colors for different areas of the country, to accommodate preferences or to improve ITN use where certain colors may have negative connotations. These reports use large household survey data to evaluate whether there are differences in use between nets of different colors in a particular country, and whether net color is associated with these differences after controlling for other determinants of net use.</p>
-<p>In ten countries, publicly available surveys have collected information on household preferences for net textile. This data is summarized on the <a href="prefs.html">Preferences</a> page. Only in Malawi, however, have both net color and preferred net color been recorded in the same survey.</p>
-<p>This work is supported by the Alliance for Malaria Prevention with funding from The Bill &amp; Melinda Gates Foundation.</p>
+<p>This website provides <a href="reports.html">reports</a> for
+countries in sub-Saharan Africa to evaluate whether there are
+differences in use of insecticide-treated nets (ITNs) due to the color
+of ITNs (typically white, blue, green, or other colors).</p>
+<p>Some countries may wish to procure ITNs of a particular color, or
+procure different colors for different areas of the country, to
+accommodate preferences or to improve ITN use where certain colors may
+have negative connotations. These reports use large household survey
+data to evaluate whether there are differences in use between nets of
+different colors in a particular country, and whether net color is
+associated with these differences after controlling for other
+determinants of net use.</p>
+<p>In ten countries, publicly available surveys have collected
+information on household preferences for net textile. This data is
+summarized on the <a href="prefs.html">Preferences</a> page. Only in
+Malawi, however, have both net color and preferred net color been
+recorded in the same survey.</p>
+<p>This work is supported by the Alliance for Malaria Prevention with
+funding from The Bill &amp; Melinda Gates Foundation.</p>
 <div class="layout-chunk" data-layout="l-body">
 
 </div>
@@ -2454,11 +2433,22 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 <h1>
 Summary
 </h1>
-<p>Data from the most recent MIS and DHS were obtained with permission from dhsprogram.com. MICS surveys do not collect net color nor preferences. Only 11 surveys from 6 countries recorded net color; 9 surveys from 5 countries recorded color preferences at household level. In four Malawi surveys both net color and color preferences were recorded, allowing for additional analysis on whether nets of the household’s preferred color are used at higher rates than nets of the non-preferred color.</p>
+<p>Data from the most recent MIS and DHS were obtained with permission
+from dhsprogram.com. MICS surveys do not collect net color nor
+preferences. Only 11 surveys from 6 countries recorded net color; 9
+surveys from 5 countries recorded color preferences at household level.
+In four Malawi surveys both net color and color preferences were
+recorded, allowing for additional analysis on whether nets of the
+household’s preferred color are used at higher rates than nets of the
+non-preferred color.</p>
 <h2>
 Preferred colors for nets
 </h2>
-<p>Color preferences for household respondents at national level are shown in Figure <a href="#fig:fig-prefsbar">1</a>. Blue was preferred by a majority of respondents in Kenya, Malawi, Rwanda, and Sierra Leone, while white was preferred in both of Madagascar’s surveys. Note that in Malawi 2012, the question was asked only in households that owned zero nets.</p>
+<p>Color preferences for household respondents at national level are
+shown in Figure <a href="#fig:fig-prefsbar">1</a>. Blue was preferred by a majority
+of respondents in Kenya, Malawi, Rwanda, and Sierra Leone, while white
+was preferred in both of Madagascar’s surveys. Note that in Malawi 2012,
+the question was asked only in households that owned zero nets.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="figure"><span style="display:block;" id="fig:fig-prefsbar"></span>
 <img src="index_files/figure-html5/fig-prefsbar-1.png" alt="Preferred net colors for household survey respondents" width="624" />
@@ -2467,7 +2457,8 @@ Figure 1: Preferred net colors for household survey respondents
 </p>
 </div>
 </div>
-<p>Fig <a href="#fig:figused">2</a> summarizes the percent of nets used of different colors for each dataset.</p>
+<p>Fig <a href="#fig:figused">2</a> summarizes the percent of nets used of
+different colors for each dataset.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="figure"><span style="display:block;" id="fig:figused"></span>
 <img src="index_files/figure-html5/figused-1.png" alt="Percent of nets used the previous night, by color" width="624" />
@@ -2476,12 +2467,21 @@ Figure 2: Percent of nets used the previous night, by color
 </p>
 </div>
 </div>
-<p>Figure <a href="#fig:figreg">3</a> shows the odds of non-white nets being used the previous night (vs white nets being used), controlling for other factors that affect ITN use, including time of the year, region, wealth quintile, urban/rural, household net supply, and age of the net. Blue nets were less likely to be used than white nets in Madagascar, Nigeria, and the three Tanzania surveys. Blue nets were more likely to be used in the 2010 and 2012 Malawi surveys, but were not used differently in the 2014 and 2017 surveys. Green nets had the same odds of being used as white nets in all surveys.</p>
+<p>Figure <a href="#fig:figreg">3</a> shows the odds of non-white nets being used
+the previous night (vs white nets being used), controlling for other
+factors that affect ITN use, including time of the year, region, wealth
+quintile, urban/rural, household net supply, and age of the net. Blue
+nets were less likely to be used than white nets in Madagascar, Nigeria,
+and the three Tanzania surveys. Blue nets were more likely to be used in
+the 2010 and 2012 Malawi surveys, but were not used differently in the
+2014 and 2017 surveys. Green nets had the same odds of being used as
+white nets in all surveys.</p>
 <div class="layout-chunk" data-layout="l-body">
 <div class="figure"><span style="display:block;" id="fig:figreg"></span>
 <img src="index_files/figure-html5/figreg-1.png" alt="Odds of a net being used the previous night, by color, controlling for other key factors" width="624" />
 <p class="caption">
-Figure 3: Odds of a net being used the previous night, by color, controlling for other key factors
+Figure 3: Odds of a net being used the previous night, by color,
+controlling for other key factors
 </p>
 </div>
 </div>
@@ -2534,31 +2534,87 @@ Figure 3: Odds of a net being used the previous night, by color, controlling for
 </ol>
 <p>Data are limited on net color and net color preferences.</p>
 <h1>
-Taking into account survey respondents’ preferences for nets of a particular color
+Taking into account survey respondents’ preferences for nets of a
+particular color
 </h1>
-<p>Very few surveys ask respondents what color of net they prefer, and even fewer ask respondents about the strength of this preference. If, however, data are available about ‘stated preferences’ (what respondents state as their preference), this can be assessed alongside the observed net use behavior.</p>
-<p>In previous work on ITN preferences, a binary variable was constructed at the household level for whether the household preferred e.g. blue nets. This variable was then included in the models shown earlier as a covariate. In many cases, the fact that a household preferred nets of a certain type was not associated with the outcome of net use. This could be because the preference was not the sole determining factor, or because the household had only nets of a different type available, and chose to use them (perhaps begrudgingly) rather than remain unprotected from malaria.</p>
-<p>Stated preferences on their own should not be used to justify procurement of nets of a single color; analysis of observed net use from survey datasets will provide the necessary information about how nets are used. However, where both types of information are available, they can be used in combination to assess the strength of these preferences relative to other determining factors.</p>
+<p>Very few surveys ask respondents what color of net they prefer, and
+even fewer ask respondents about the strength of this preference. If,
+however, data are available about ‘stated preferences’ (what respondents
+state as their preference), this can be assessed alongside the observed
+net use behavior.</p>
+<p>In previous work on ITN preferences, a binary variable was
+constructed at the household level for whether the household preferred
+e.g. blue nets. This variable was then included in the models shown
+earlier as a covariate. In many cases, the fact that a household
+preferred nets of a certain type was not associated with the outcome of
+net use. This could be because the preference was not the sole
+determining factor, or because the household had only nets of a
+different type available, and chose to use them (perhaps begrudgingly)
+rather than remain unprotected from malaria.</p>
+<p>Stated preferences on their own should not be used to justify
+procurement of nets of a single color; analysis of observed net use from
+survey datasets will provide the necessary information about how nets
+are used. However, where both types of information are available, they
+can be used in combination to assess the strength of these preferences
+relative to other determining factors.</p>
 <h1>
 Steps if data are not available
 </h1>
-<p>If survey data are old, incomplete, or if recent mass distributions have involved only nets of a single color and thus the net crop is highly unbalanced, countries may need to collect additional data and/or ensure that a mix of ITNs are distributed in future campaigns.</p>
+<p>If survey data are old, incomplete, or if recent mass distributions
+have involved only nets of a single color and thus the net crop is
+highly unbalanced, countries may need to collect additional data and/or
+ensure that a mix of ITNs are distributed in future campaigns.</p>
 <h1>
 Additional data sources that may be useful for triangulation
 </h1>
 <h2>
-Redemption rates for campaign ITNs at distribution points - do redemption rates differ for ITNs of different color?
+Redemption rates for campaign ITNs at distribution points - do
+redemption rates differ for ITNs of different color?
 </h2>
-<p>Where redemption data for mass campaigns is available and can be linked directly with the type of ITN distributed, preferably at a district level, this may be useful to look at. The question is whether redemption rates for ITNs differ because of the color of the net being given out at distribution points. (For campaigns conducting door to door distribution, we would not anticipate high rates of refusals of ITNs once the distribution teams are on the doorstep.)</p>
-<p>Redemption rates for different communities for ITN campaigns are likely to differ due to reasons unrelated to the net color, and so it is important to consider these other potential factors when interpreting redemption rate data. Anecdotal observations during some campaigns may attribute reduced redemption rates to not wanting to bother with the effort of picking up ITNs if they are the less-preferred color, and these observations are important. It’s crucial to consider the other options households may have for bite prevention when they decline to pick up ITNs; perhaps they can access their preferred ITN in the market or pharmacy, or they have other options such as coils or sprays that they feel sufficiently protect them, or (and) they feel that their overall risk of severe consequences of malaria is low. In some of these contexts, it’s possible that providing the preferred net would lead to some increases in ITN use, but would not suddenly lead to everyone using ITNs all the time, given other factors contributing to low net use overall.</p>
+<p>Where redemption data for mass campaigns is available and can be
+linked directly with the type of ITN distributed, preferably at a
+district level, this may be useful to look at. The question is whether
+redemption rates for ITNs differ because of the color of the net being
+given out at distribution points. (For campaigns conducting door to door
+distribution, we would not anticipate high rates of refusals of ITNs
+once the distribution teams are on the doorstep.)</p>
+<p>Redemption rates for different communities for ITN campaigns are
+likely to differ due to reasons unrelated to the net color, and so it is
+important to consider these other potential factors when interpreting
+redemption rate data. Anecdotal observations during some campaigns may
+attribute reduced redemption rates to not wanting to bother with the
+effort of picking up ITNs if they are the less-preferred color, and
+these observations are important. It’s crucial to consider the other
+options households may have for bite prevention when they decline to
+pick up ITNs; perhaps they can access their preferred ITN in the market
+or pharmacy, or they have other options such as coils or sprays that
+they feel sufficiently protect them, or (and) they feel that their
+overall risk of severe consequences of malaria is low. In some of these
+contexts, it’s possible that providing the preferred net would lead to
+some increases in ITN use, but would not suddenly lead to everyone using
+ITNs all the time, given other factors contributing to low net use
+overall.</p>
 <h2>
-Durability monitoring data - do retention and care behaviors differ for ITNs of different colors?
+Durability monitoring data - do retention and care behaviors differ for
+ITNs of different colors?
 </h2>
-<p>It is possible that nets that are less preferred may be subject to less careful net care and repair behaviors, or given away at higher rates, or discarded earlier. Given the sample size and design of durability monitoring activities, it would be very difficult to trace back differences in net retention and physical integrity specifically to the net’s color. We would likewise be cautious in relying on meta analyses of multi-country durability data to investigate the impact of color on retention and physical integrity, given the high rate of variation in durability for nets of the same brand over different geographic and social contexts. However, it may be useful to leverage this data when triangulating from household survey data and redemption rate data, and assess whether findings are aligned or misaligned.</p>
+<p>It is possible that nets that are less preferred may be subject to
+less careful net care and repair behaviors, or given away at higher
+rates, or discarded earlier. Given the sample size and design of
+durability monitoring activities, it would be very difficult to trace
+back differences in net retention and physical integrity specifically to
+the net’s color. We would likewise be cautious in relying on meta
+analyses of multi-country durability data to investigate the impact of
+color on retention and physical integrity, given the high rate of
+variation in durability for nets of the same brand over different
+geographic and social contexts. However, it may be useful to leverage
+this data when triangulating from household survey data and redemption
+rate data, and assess whether findings are aligned or misaligned.</p>
 <div class="layout-chunk" data-layout="l-body">
 <pre><code>NULL</code></pre>
 </div>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
