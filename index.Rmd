@@ -20,15 +20,18 @@ library(broom)
 library(spData)
 library(sf)
 library(cowplot)
-library(rdhs)
 library(RColorBrewer)
 library(ggpubr)
 library(todor)
+library(flextable)
+library(rdhs)
 
 theme_set(theme_classic())
 
 
 colorpal <- c(blue="#5587C9", white="snow", pink="pink", green="forestgreen", "blue and white striped"="lightblue", red="firebrick", striped="lightblue", black="dimgrey", other="tan", "don't care/dk"="wheat")
+
+colorpalline <- c(blue="#5587C9", white="grey", pink="pink", green="forestgreen", "blue and white striped"="lightblue", red="firebrick", striped="lightblue", black="dimgrey", other="tan", "don't care/dk"="wheat")
 ```
 
 This website provides [reports](reports.html) for countries in sub-Saharan Africa to evaluate whether there are differences in use of insecticide-treated nets (ITNs) due to the color of ITNs (typically white, blue, green, or other colors).
@@ -147,7 +150,7 @@ prefs %>%
        title="Respondents' preferred net color")
 
 #TODO: account for no pref in Mada and Kenya, per original paper
-#TODO: count up surveys and countries in above paragraph
+
 ```
 
 Fig \@ref(fig:figused) summarizes the percent of nets used of different colors for each dataset. 
@@ -166,7 +169,7 @@ use %>%
        fill="")
 ```
 
-Figure \@ref(fig:figreg) shows the odds of non-white nets being used the previous night (vs white nets being used), controlling for other factors that affect ITN use, including time of the year, region, wealth quintile, urban/rural, household net supply, and age of the net. Blue nets were less likely to be used than white nets in Madagascar, Nigeria, and the three Tanzania surveys. Blue nets were more likely to be used in the 2010 and 2012 Malawi surveys, but were not used differently in the 2014 and 2017 surveys. Green nets had the same odds of being used as white nets in all surveys.
+Figure \@ref(fig:figreg) shows the odds of non-white nets being used the previous night (vs white nets being used), controlling for other factors that affect ITN use, including time of the year, region, wealth quintile, urban/rural, household net supply, and age of the net. Blue nets were less likely to be used than white nets in Madagascar, Nigeria, and the three Tanzania surveys. Blue nets were more likely to be used in the 2010 and 2012 Malawi surveys, but were not used differently in the 2014 and 2017 surveys. Green nets had the same odds of being used as white nets in all surveys. Findings are summarized in Table \@ref(tab:tabreg).
 
 ```{r figreg, fig.cap="Odds of a net being used the previous night, by color, controlling for other key factors"}
 cregs %>% 
@@ -184,12 +187,65 @@ cregs %>%
 ```
 
 
+```{r tabreg, tab.cap="Odds of a net being used the previous night, by color, compared to white nets. Results are from a multivariate logistic regression model controlling for household net supply, age of the net, time of year (month), region, wealth quintile, and urban/rural residence."}
 
+ct <- use %>% 
+  filter(color=="blue") %>% 
+  select(dataset, country, countrysurvey)
+
+cregscty <- cregs %>% 
+  left_join(ct) %>% 
+  select(countrysurvey, var, odds, pval)
+
+cregscty %>% 
+  mutate(odds=case_when(pval<0.05 ~ paste0(round(odds, digits=2), "*"),
+                        TRUE ~ as.character(round(odds, digits=2)))) %>% 
+  select(-pval) %>% 
+  mutate(white="1.00") %>% 
+  pivot_wider(names_from=var, values_from=odds) %>% 
+  flextable() %>% 
+  set_header_labels(countrysurvey="Survey",
+                    white="White (ref)",
+                    blue="Blue",
+                    green="Green",
+                    other="Other",
+                    unknown="Unknown color") %>% 
+  add_footer_row(values = "* indicates p-value < 0.05", colwidths = c(6), top = FALSE)
+```
+
+
+```{r prefsses}
+ses <- read_excel("../Color/output/color_netuse.xls", sheet="Prefs_ses") %>% 
+  clean_names()
+
+ses %>% 
+  ggplot() +
+  geom_line(aes(x=ses, y=percent_preferred, color=color)) +
+  scale_color_manual(values=colorpalline) +
+  facet_wrap(~dataset)
+```
 
 ```{r readreg, eval=FALSE}
-reg <- read_excel("/Users/hannahkoenker/Dropbox/A DHS MIS Datasets/Analysis/Textile/reg_textile_use.xlsx"
+region <- read_excel("../Color/output/color_netuse.xls", sheet="Prefs_region"
   ) %>%
-  clean_names()
+  clean_names() %>% 
+  group_by(dataset, region) %>% 
+  slice_max(percent_preferred)
+
+mlw <- region %>% 
+  filter(country=="Malawi")
+
+ken <- region %>% 
+  filter(country=="Kenya")
+
+mad <- region %>% 
+  filter(country=="Madagascar")
+
+sl <- region %>% 
+  filter(country=="Sierra")
+
+rwa  <-  region %>% 
+  filter(country=="Rwanda")
 ```
 
 ```{r burkina, eval=FALSE}
@@ -279,7 +335,7 @@ spml <- download_boundaries(surveyId = ml$SurveyId[1], method = "sf")
 ``` {r rwanda, eval=FALSE}
 rw <- dhs_data(countryIds = "RW",
               indicatorIds = "FE_FRTR_W_A15",
-              surveyYearStart = 2019, 
+              surveyYear = 2013, 
               breakdown = "subnational") %>% 
   mutate(region = base::iconv (CharacteristicLabel, to="ASCII//TRANSLIT"),
          region = gsub("'", '', region),
@@ -287,7 +343,8 @@ rw <- dhs_data(countryIds = "RW",
 
 
 # get our related spatial data frame object
-sprw <- download_boundaries(surveyId = rw$SurveyId[1], method = "sf")
+sprw <- download_boundaries(surveyId = rw$SurveyId[1], method = "sf") %>% 
+  filter(SVYYEAR==2013)
 
 # rwshp<-list.files("rdhs/rw_sdr_subnational_boundaries_2022-01-11/shps/", pattern = ".shp$",full.names=TRUE)
 ```
@@ -302,148 +359,45 @@ sprw <- download_boundaries(surveyId = rw$SurveyId[1], method = "sf")
 
 
 ```{r regjoins, eval=FALSE}
-gn <- reg %>%
-  filter(datafile=="GNHR71") %>%
-  left_join(gn, by = "region") %>%
-  mutate(diffuse = (percent_of_polyester_nets_used-percent_of_polyethylene_nets_used),
-         diffuse2 = ifelse(p_value_crudeuse < 0.05, diffuse, NA),
-         diff = if_else(p_value_crudeuse > 0.05, -1, diffuse),
-    diff = cut(diff, breaks = c(-2, 0, 5, 10, 15, Inf)),
-    diff = fct_recode(diff, "no difference" = "(-2,0]",
-                      "<5 pts" = "(0,5]",
-                      "5-9.9 pts" = "(5,10]",
-                      "10-15 pts" = "(10,15]",
-                      "15+ pts" = "(15,Inf]"),
-    aor = ifelse(pval_aor < 0.05, aor_for_textile, NA))
+# gn <- reg %>%
+#   filter(datafile=="GNHR71") %>%
+#   left_join(gn, by = "region") %>%
+#   mutate(diffuse = (percent_of_polyester_nets_used-percent_of_polyethylene_nets_used),
+#          diffuse2 = ifelse(p_value_crudeuse < 0.05, diffuse, NA),
+#          diff = if_else(p_value_crudeuse > 0.05, -1, diffuse),
+#     diff = cut(diff, breaks = c(-2, 0, 5, 10, 15, Inf)),
+#     diff = fct_recode(diff, "no difference" = "(-2,0]",
+#                       "<5 pts" = "(0,5]",
+#                       "5-9.9 pts" = "(5,10]",
+#                       "10-15 pts" = "(10,15]",
+#                       "15+ pts" = "(15,Inf]"),
+#     aor = ifelse(pval_aor < 0.05, aor_for_textile, NA))
 
-gn21 <- reg %>%
-  filter(datafile=="GNHR81") %>%
-  left_join(gn21, by = "region") %>%
-  mutate(diffuse = (percent_of_polyester_nets_used-percent_of_polyethylene_nets_used),
-         diffuse2 = ifelse(p_value_crudeuse < 0.05, diffuse, NA),
-         diff = if_else(p_value_crudeuse > 0.05, -1, diffuse),
-    diff = cut(diff, breaks = c(-2, 0, 5, 10, 15, Inf)),
-    diff = fct_recode(diff, "no difference" = "(-2,0]",
-                      "<5 pts" = "(0,5]",
-                      "5-9.9 pts" = "(5,10]",
-                      "10-15 pts" = "(10,15]",
-                      "15+ pts" = "(15,Inf]"),
-    aor = ifelse(pval_aor < 0.05, aor_for_textile, NA))
 
-lb <- reg %>% 
-  filter(datafile=="LBHR7A") %>% 
-  left_join(lb, by = "region") %>% 
-  mutate(diffuse = (percent_of_polyester_nets_used-percent_of_polyethylene_nets_used),
-         diffuse2 = ifelse(p_value_crudeuse < 0.05, diffuse, NA),
-         diff = if_else(p_value_crudeuse > 0.05, -1, diffuse),
-    diff = cut(diff, breaks = c(-2, 0, 5, 10, 15, Inf)),
-    diff = fct_recode(diff, "no difference" = "(-2,0]",
-                      "<5 pts" = "(0,5]",
-                      "5-9.9 pts" = "(5,10]",
-                      "10-15 pts" = "(10,15]",
-                      "15+ pts" = "(15,Inf]"),
-    aor = ifelse(pval_aor <0.05,aor_for_textile,NA))
 
-ml <- reg %>% 
-  filter(datafile=="MLHR81") %>% 
-  left_join(ml, by = "region") %>% 
-  mutate(diffuse = (percent_of_polyester_nets_used-percent_of_polyethylene_nets_used),
-         diffuse2 = ifelse(p_value_crudeuse < 0.05, diffuse, NA),
-         diff = if_else(p_value_crudeuse > 0.05, -1, diffuse),
-    diff = cut(diff, breaks = c(-2, 0, 5, 10, 15, Inf)),
-    diff = fct_recode(diff, "no difference" = "(-2,0]",
-                      "<5 pts" = "(0,5]",
-                      "5-9.9 pts" = "(5,10]",
-                      "10-15 pts" = "(10,15]",
-                      "15+ pts" = "(15,Inf]"),
-    aor = ifelse(pval_aor <0.05,aor_for_textile,NA))
 
-bf <- reg %>% 
-  filter(datafile=="BFHR7A") %>% 
-  left_join(bf, by = "region") %>% 
-  mutate(diffuse = (percent_of_polyester_nets_used-percent_of_polyethylene_nets_used),
-        diffuse2 = ifelse(p_value_crudeuse < 0.05, diffuse, NA),
-        diff = if_else(p_value_crudeuse > 0.05, -1, diffuse),
-    diff = cut(diff, breaks = c(-2, 0, 5, 10, 15, Inf)),
-    diff = fct_recode(diff, "no difference" = "(-2,0]",
-                      "<5 pts" = "(0,5]",
-                      "5-9.9 pts" = "(5,10]",
-                      "10-15 pts" = "(10,15]",
-                      "15+ pts" = "(15,Inf]"),
-    aor = ifelse(pval_aor <0.05,aor_for_textile,NA))
-
-rw <- reg %>% 
-  filter(datafile=="RWHR81") %>% 
+rw <- rwa %>% 
+  mutate(region=tolower(region)) %>% 
   left_join(rw, by = "region") %>% 
-  mutate(diffuse = (percent_of_polyester_nets_used-percent_of_polyethylene_nets_used),
-        diffuse2 = ifelse(p_value_crudeuse < 0.05, diffuse, NA),
-        diff = if_else(p_value_crudeuse > 0.05, -1, diffuse),
-    diff = cut(diff, breaks = c(-2, 0, 5, 10, 15, Inf)),
-    diff = fct_recode(diff, "no difference" = "(-2,0]",
-                      "<5 pts" = "(0,5]",
-                      "5-9.9 pts" = "(5,10]",
-                      "10-15 pts" = "(10,15]",
-                      "15+ pts" = "(15,Inf]"),
-    aor = ifelse(pval_aor <0.05,aor_for_textile,NA))
+  filter(SurveyYearLabel==2013)
+
+
 
 
 ```
 
 ```{r joiningstuff, eval=FALSE}
 
-mbf <- bf$diff[match(spbf$sdr_subnational_boundaries$REG_ID, bf$RegionId)]
-spbf$sdr_subnational_boundaries$diff <- mbf
 
-mlb <- lb$diff[match(splb$sdr_subnational_boundaries$REG_ID, lb$RegionId)]
-splb$sdr_subnational_boundaries$diff <- mlb
 
-mml <- ml$diff[match(spml$sdr_subnational_boundaries$REG_ID, ml$RegionId)]
-spml$sdr_subnational_boundaries$diff <- mml
+mrw <- rw$color[match(sprw$sdr_subnational_boundaries$REG_ID, rw$RegionId)]
+sprw$sdr_subnational_boundaries$color <- mrw
 
-mgn <- gn$diff[match(spgn$sdr_subnational_boundaries$REG_ID, gn$RegionId)]
-spgn$sdr_subnational_boundaries$diff <- mgn
 
-mgn21 <- gn21$diff[match(spgn21$sdr_subnational_boundaries$REG_ID, gn21$RegionId)]
-spgn21$sdr_subnational_boundaries$diff <- mgn21
 
-mrw <- rw$diff[match(sprw$sdr_subnational_boundaries$REG_ID, rw$RegionId)]
-sprw$sdr_subnational_boundaries$diff <- mrw
 
-mbf <- bf$diffuse2[match(spbf$sdr_subnational_boundaries$REG_ID, bf$RegionId)]
-spbf$sdr_subnational_boundaries$diffuse2 <- mbf
 
-mlb <- lb$diffuse2[match(splb$sdr_subnational_boundaries$REG_ID, lb$RegionId)]
-splb$sdr_subnational_boundaries$diffuse2 <- mlb
 
-mml <- ml$diffuse2[match(spml$sdr_subnational_boundaries$REG_ID, ml$RegionId)]
-spml$sdr_subnational_boundaries$diffuse2 <- mml
-
-mgn <- gn$diffuse2[match(spgn$sdr_subnational_boundaries$REG_ID, gn$RegionId)]
-spgn$sdr_subnational_boundaries$diffuse2 <- mgn
-
-mgn21 <- gn21$diffuse2[match(spgn21$sdr_subnational_boundaries$REG_ID, gn21$RegionId)]
-spgn21$sdr_subnational_boundaries$diffuse2 <- mgn21
-
-mrw <- rw$diffuse2[match(sprw$sdr_subnational_boundaries$REG_ID, rw$RegionId)]
-sprw$sdr_subnational_boundaries$diffuse2 <- mrw
-
-mbf <- bf$aor[match(spbf$sdr_subnational_boundaries$REG_ID, bf$RegionId)]
-spbf$sdr_subnational_boundaries$aor <- mbf
-
-mlb <- lb$aor[match(splb$sdr_subnational_boundaries$REG_ID, lb$RegionId)]
-splb$sdr_subnational_boundaries$aor <- mlb
-
-mml <- ml$aor[match(spml$sdr_subnational_boundaries$REG_ID, ml$RegionId)]
-spml$sdr_subnational_boundaries$aor <- mml
-
-mgn <- gn$aor[match(spgn$sdr_subnational_boundaries$REG_ID, gn$RegionId)]
-spgn$sdr_subnational_boundaries$aor <- mgn
-
-mgn21 <- gn21$aor[match(spgn21$sdr_subnational_boundaries$REG_ID, gn21$RegionId)]
-spgn21$sdr_subnational_boundaries$aor <- mgn21
-
-mrw <- rw$aor[match(sprw$sdr_subnational_boundaries$REG_ID, rw$RegionId)]
-sprw$sdr_subnational_boundaries$aor <- mrw
 ```
 
 
@@ -452,101 +406,87 @@ sprw$sdr_subnational_boundaries$aor <- mrw
 
 # if having an error discrete/cont scale here, check if the Stata do file has been run for these countries.
 
-g1 <- ggplot(spbf$sdr_subnational_boundaries) +
-  geom_sf(aes(fill = diffuse2), color = "lightgray") +
-  theme_void() +
-  scale_fill_distiller(palette = "RdBu", direction = 1,
-    na.value = "whitesmoke",
-    limits = c(-35,35)) +
-  labs(
-    fill = "Use difference",
-    color = "",
-    title = "Burkina Faso 2018",
-    caption = ""
-  ) +
-  theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
+# g1 <- ggplot(spbf$sdr_subnational_boundaries) +
+#   geom_sf(aes(fill = diffuse2), color = "lightgray") +
+#   theme_void() +
+#   scale_fill_distiller(palette = "RdBu", direction = 1,
+#     na.value = "whitesmoke",
+#     limits = c(-35,35)) +
+#   labs(
+#     fill = "Use difference",
+#     color = "",
+#     title = "Burkina Faso 2018",
+#     caption = ""
+#   ) +
+#   theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
+# 
+# g2 <- ggplot(spgn$sdr_subnational_boundaries) +
+#   geom_sf(aes(fill = diffuse2), color = "lightgray") +
+#  theme_void() +
+#    scale_fill_distiller(palette = "RdBu", direction = 1,
+#     na.value = "whitesmoke",
+#     limits = c(-35,35)) +
+#   labs(
+#     fill = "Use difference",
+#     color = "",
+#     title = "Guinea 2018",
+#     caption = ""
+#   ) +
+#   theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
+# 
+# g21 <- ggplot(spgn21$sdr_subnational_boundaries) +
+#   geom_sf(aes(fill = diffuse2), color = "lightgray") +
+#  theme_void() +
+#    scale_fill_distiller(palette = "RdBu", direction = 1,
+#     na.value = "whitesmoke",
+#     limits = c(-35,35)) +
+#   labs(
+#     fill = "Use difference",
+#     color = "",
+#     title = "Guinea 2021",
+#     caption = ""
+#   ) +
+#   theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
+# 
+# 
+# g3 <- ggplot(splb$sdr_subnational_boundaries) +
+#   geom_sf(aes(fill = diffuse2), color = "lightgray") +
+#  theme_void() +
+#  scale_fill_distiller(palette = "RdBu", direction = 1,
+#     na.value = "whitesmoke",
+#     limits = c(-35,35)) +
+#   labs(
+#     fill = "Use difference",
+#     color = "",
+#     title = "Liberia 2019",
+#     caption = ""
+#   ) +
+#   theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
 
-g2 <- ggplot(spgn$sdr_subnational_boundaries) +
-  geom_sf(aes(fill = diffuse2), color = "lightgray") +
+
+
+ggplot(sprw$sdr_subnational_boundaries) +
+  geom_sf(aes(fill = as.factor(color)), color = "lightgray") +
  theme_void() +
-   scale_fill_distiller(palette = "RdBu", direction = 1,
-    na.value = "whitesmoke",
-    limits = c(-35,35)) +
-  labs(
-    fill = "Use difference",
-    color = "",
-    title = "Guinea 2018",
-    caption = ""
-  ) +
-  theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
-
-g21 <- ggplot(spgn21$sdr_subnational_boundaries) +
-  geom_sf(aes(fill = diffuse2), color = "lightgray") +
- theme_void() +
-   scale_fill_distiller(palette = "RdBu", direction = 1,
-    na.value = "whitesmoke",
-    limits = c(-35,35)) +
-  labs(
-    fill = "Use difference",
-    color = "",
-    title = "Guinea 2021",
-    caption = ""
-  ) +
-  theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
-
-
-g3 <- ggplot(splb$sdr_subnational_boundaries) +
-  geom_sf(aes(fill = diffuse2), color = "lightgray") +
- theme_void() +
- scale_fill_distiller(palette = "RdBu", direction = 1,
-    na.value = "whitesmoke",
-    limits = c(-35,35)) +
-  labs(
-    fill = "Use difference",
-    color = "",
-    title = "Liberia 2019",
-    caption = ""
-  ) +
-  theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
-
-
-
-g4 <- ggplot(sprw$sdr_subnational_boundaries) +
-  geom_sf(aes(fill = diffuse2), color = "lightgray") +
- theme_void() +
- scale_fill_distiller(palette = "RdBu", direction = 1,
-    na.value = "whitesmoke",
-    limits = c(-35,35)) +
-  labs(
-    fill = "Use difference",
-    color = "",
-    title = "Rwanda 2020",
-    caption = ""
-  ) +
+ # scale_fill_manual(values = colorpal,
+ #    na.value = "whitesmoke") +
+  # labs(
+  #   fill = "Most preferred net color",
+  #   color = "",
+  #   title = "Rwanda",
+  #   caption = ""
+  # ) +
   # geom_sf_label(aes(label = "REGNAME"), size=.5) +
   theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
 
-g5 <- ggplot(spml$sdr_subnational_boundaries) +
-  geom_sf(aes(fill = diffuse2), color = "lightgray") +
- theme_void() +
- scale_fill_distiller(palette = "RdBu", direction = 1,
-    na.value = "whitesmoke",
-    limits = c(-35,35)) +
-  labs(
-    fill = "Use difference",
-    color = "",
-    title = "Mali 2021",
-    caption = ""
-  ) +
-  # geom_sf_label(aes(label = "REGNAME"), size=.5) +
-  theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
+
 
 text <- paste("Blue indicates polyester nets are used more;",
 "red indicates that polyethylene nets are used more", sep = "\n")
 
 gt <- text_grob(text, just="center")
 
-plot_grid(g1, g21, g3, g4)
+# plot_grid(g1, g21, g3, g4)
 
 # gn %>% 
 #   ggplot(spgn$sdr_subnational_boundaries) +
@@ -637,20 +577,20 @@ ga3 <- ggplot(splb$sdr_subnational_boundaries) +
 
 
 ga4 <- ggplot(sprw$sdr_subnational_boundaries) +
-  geom_sf(aes(fill = aor), color = "lightgray") +
+  geom_sf(aes(fill = percent_preferred), color = "lightgray") +
  theme_void() +
- scale_fill_gradient2(
-    low = "lightblue",
-    mid = "ghostwhite",
-    high = "lightcoral",
-    midpoint = 1.0,
-   limits = c(0,3),
-    na.value = "WhiteSmoke"
-  ) +
+ # scale_fill_gradient2(
+ #    low = "lightblue",
+ #    mid = "ghostwhite",
+ #    high = "lightcoral",
+ #    midpoint = 1.0,
+ #   limits = c(0,3),
+ #    na.value = "WhiteSmoke"
+ #  ) +
   labs(
-    fill = "Adjusted Odds Ratio",
+    fill = "Preferred net color",
     color = "",
-    title = "Rwanda 2020",
+    title = "Rwanda",
     caption = ""
   ) +
   theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
