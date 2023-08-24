@@ -451,6 +451,13 @@ cregsum <- cregscty %>%
   
 ```
 
+
+```{r}
+
+invisible(todor())
+```
+
+
 <h2>8. Conclusions</h2>
 
 Data are limited on net color and net color preferences. In the `r length(unique(prefs$country))` countries where respondents have been asked about their preferred net color, in four countries blue was the predominantly preferred color, and one country (Madagascar) preferred white with blue as the second choice. Of the `r length(unique(regs$country))` countries where net color was recorded, blue nets were as likely to be used as white nets in Malawi, Mozambique, and Rwanda, while in Madagascar, Nigeria, and all three Tanzania surveys, blue nets had between `r cregsum %>% slice_min(oo) %>% pull(oo)` and `r cregsum %>% slice_max(oo) %>% pull(oo)` reduced odds of being used, controlling for other factors that influence net use. 
@@ -478,9 +485,3 @@ Redemption rates for different communities for ITN campaigns are likely to diffe
 <h2>Durability monitoring data - do retention and care behaviors differ for ITNs of different colors?</h2>
 
 It is possible that nets that are less preferred may be subject to less careful net care and repair behaviors, or given away at higher rates, or discarded earlier. Given the sample size and design of durability monitoring activities, it would be very difficult to trace back differences in net retention and physical integrity specifically to the net's color. We would likewise be cautious in relying on meta analyses of multi-country durability data to investigate the impact of color on retention and physical integrity, given the high rate of variation in durability for nets of the same brand over different geographic and social contexts. However, it may be useful to leverage this data when triangulating from household survey data and redemption rate data, and assess whether findings are aligned or misaligned.
-
-```{r}
-
-todor()
-```
-
