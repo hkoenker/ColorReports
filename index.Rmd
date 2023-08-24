@@ -182,15 +182,23 @@ cregscty %>%
 
 <h2>Preferred colors for nets, by wealth quintile</h2>
 
+There were some clear trends in color preferences by wealth quintile, shown in Figure \@ref(fig:prefsses). In Kenya, white net preference increased with wealth quintile while blue declined. In Madagascar, white was the general favorite but also increased in the wealthiest quintile, at the expense of blue and green nets. In Malawi, blue and green were nearly equally preferred by the poorest quintile, with blue increasing and green decreasing with higher wealth. By 2017, however, blue was more strongly preferred among all wealth quintiles. In Rwanda and Sierra Leone, blue was preferred by the vast majority of respondents, with white preferred marginally over blue in the highest wealth quintile in Rwanda, and a slight reduction in blue preference in Sierra Leone in the highest wealth quintile.
+
 ```{r prefsses}
 ses <- read_excel("../Color/output/color_netuse.xls", sheet="Prefs_ses") %>% 
   clean_names()
 
 ses %>% 
+  mutate(ses=factor(ses, levels=c(1,2,3,4,5), labels=c("Poorest", "Poorer", "Middle", "Richer", "Richest"))) %>% 
   ggplot() +
-  geom_line(aes(x=ses, y=percent_preferred, color=color)) +
+  geom_line(aes(x=ses, y=percent_preferred, color=color, group=color)) +
   scale_color_manual(values=colorpalline) +
-  facet_wrap(~dataset)
+  labs(x="",
+       y="Percent respondents",
+       title = "Net color preferences by wealth quintile",
+       color="") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)) +
+  facet_wrap(~countrysurvey)
 ```
 
 ```{r readreg, eval=FALSE}
