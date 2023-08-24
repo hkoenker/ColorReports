@@ -29,9 +29,11 @@ library(rdhs)
 theme_set(theme_classic())
 
 
-colorpal <- c(blue="#5587C9", white="snow", pink="pink", green="forestgreen", "blue and white striped"="lightblue", red="firebrick", striped="lightblue", black="dimgrey", other="tan", "don't care/dk"="wheat")
+colorpal <- c(blue="#5587C9", white="snow", pink="pink", green="forestgreen", "blue and white striped"="lightblue", red="firebrick", striped="lightblue", black="dimgrey", other="pink", "don't care/dk"="wheat")
 
-colorpalline <- c(blue="#5587C9", white="grey", pink="pink", green="forestgreen", "blue and white striped"="lightblue", red="firebrick", striped="lightblue", black="dimgrey", other="tan", "don't care/dk"="wheat")
+colorpalline <- c(blue="#5587C9", white="grey", pink="pink", green="forestgreen", "blue and white striped"="lightblue", red="firebrick", striped="lightblue", black="dimgrey", other="pink", "don't care/dk"="wheat")
+
+#TODO: set up netlify website for this color analysis
 ```
 
 This website provides [reports](reports.html) for countries in sub-Saharan Africa to evaluate whether there are differences in use of insecticide-treated nets (ITNs) due to the color of ITNs (typically white, blue, green, or other colors).
@@ -39,8 +41,7 @@ This website provides [reports](reports.html) for countries in sub-Saharan Afric
 Some countries may wish to procure ITNs of a particular color, or procure different colors for different areas of the country, to accommodate preferences or to improve ITN use where certain colors may have negative connotations. These reports use large household survey data to evaluate whether there are differences in use between nets of different colors in a particular country, and whether net color is associated with these differences after controlling for other determinants of net use.
 
 
-
-In ten countries, publicly available surveys have collected information on household preferences for net textile. This data is summarized on the [Preferences](prefs.html) page. Only in Malawi, however, have both net color and preferred net color been recorded in the same survey.
+In a limited number of countries, publicly available surveys have collected information on household preferences for net textile. This data is summarized on the [Preferences](prefs.html) page. Only in Malawi, however, have both net color and preferred net color been recorded in the same survey.
 
 This work is supported by the Alliance for Malaria Prevention with funding from The Bill & Melinda Gates Foundation.
 
@@ -81,41 +82,7 @@ regs <- read_dta("../Color/output/color_logistic.dta") %>%
 
 cregs <- regs %>% 
   filter(var %in% c("blue", "green", "other", "unknown"))
-# %>%
-#   mutate(
-#     diffuse = abs(
-#       percent_of_polyester_nets_used - percent_of_polyethylene_nets_used
-#     ),
-#     country = str_replace_all(country, "[:digit:]", ""),
-#     country = str_replace_all(country, " -", ""),
-#     country = str_trim(country)
-#   ) %>%
-#   group_by(country) %>%
-#   slice(which.max(year)) %>%
-#   mutate(
-#     diff5 = if_else(diffuse > 5, ">5 points difference", "<=5 points difference"),
-#     country = case_when(
-#       country == "GuineaBissau" ~ "Guinea-Bissau",
-#       country == "Gambia" ~ "The Gambia",
-#       country == "Congo" ~ "Republic of Congo",
-#       country == "DRC" ~ "Democratic Republic of the Congo",
-#       country == "CAR" ~ "Central African Republic",
-#       TRUE ~ as.character(country)
-#     ),
-#     diff = if_else(p_value_crudeuse > 0.05, -1, diffuse),
-#     diff = cut(diff, breaks = c(-2, 0, 5, 10, 15, Inf)),
-#     name = country,
-#     aor_for_textile = if_else(is.na(p_0_05_aor), 1, aor_for_textile),
-#     aor_for_textile = ifelse(is.na(country), NA, aor_for_textile),
-#     melogit_aor = if_else(is.na(melogit_star),1,note_aor_is_controlling_for_net_supply_region_ses_residence_month),
-#     justify = case_when(
-#       (p_value_crudeuse < 0.05 & aor_for_textile!=1 & !is.na(aor_for_textile)) ~ "Both significant",
-#       (p_value_crudeuse < 0.05 & aor_for_textile==1) ~ "Crude use is different, but textile not a predictor in model",
-#       (p_value_crudeuse > 0.05 & aor_for_textile!=1 & !is.na(aor_for_textile)) ~ "No difference in crude use, but textile is a predictor in model",
-#       (p_value_crudeuse > 0.05 & aor_for_textile==1) ~ "Neither significant"
-#     ),
-#     justify = factor(justify, levels = c("Both significant","Crude use is different, but textile not a predictor in model","No difference in crude use, but textile is a predictor in model","Neither significant"))
-#     )
+
 ```
 
 ```{r worldmap}
@@ -126,10 +93,8 @@ africa = world %>%
   left_join(popcolor, by="name") %>% 
   st_transform("+proj=aea +lat_1=20 +lat_2=-23 +lat_0=0 +lon_0=25")
 
-```
+crs_africa <-  st_crs(africa) # not sure this is used later.
 
-```{r make_sf}
-crs_africa <-  st_crs(africa)
 ```
 
 <h1>Summary</h1>
@@ -153,6 +118,8 @@ prefs %>%
 
 ```
 
+<h2>Use of nets, by color</h2>
+
 Fig \@ref(fig:figused) summarizes the percent of nets used of different colors for each dataset. 
 
 ```{r figused, fig.cap="Percent of nets used the previous night, by color"}
@@ -169,7 +136,7 @@ use %>%
        fill="")
 ```
 
-Figure \@ref(fig:figreg) shows the odds of non-white nets being used the previous night (vs white nets being used), controlling for other factors that affect ITN use, including time of the year, region, wealth quintile, urban/rural, household net supply, and age of the net. Blue nets were less likely to be used than white nets in Madagascar, Nigeria, and the three Tanzania surveys. Blue nets were more likely to be used in the 2010 and 2012 Malawi surveys, but were not used differently in the 2014 and 2017 surveys. Green nets had the same odds of being used as white nets in all surveys. Findings are summarized in Table \@ref(tab:tabreg).
+Figure \@ref(fig:figreg) shows the odds of non-white nets being used the previous night (vs white nets being used), controlling for other factors that affect ITN use, including time of the year, region, wealth quintile, urban/rural, household net supply, and age of the net. Blue nets were less likely to be used than white nets in Madagascar, Nigeria, and the three Tanzania surveys. Blue nets were more likely to be used in the 2010 and 2012 Malawi surveys, but were not used differently in the 2014 and 2017 surveys. Green nets had the same odds of being used as white nets in all surveys. Findings are also summarized in Table \@ref(tab:tabreg).
 
 ```{r figreg, fig.cap="Odds of a net being used the previous night, by color, controlling for other key factors"}
 cregs %>% 
@@ -213,6 +180,7 @@ cregscty %>%
   add_footer_row(values = "* indicates p-value < 0.05", colwidths = c(6), top = FALSE)
 ```
 
+<h2>Preferred colors for nets, by wealth quintile</h2>
 
 ```{r prefsses}
 ses <- read_excel("../Color/output/color_netuse.xls", sheet="Prefs_ses") %>% 
@@ -235,100 +203,18 @@ region <- read_excel("../Color/output/color_netuse.xls", sheet="Prefs_region"
 mlw <- region %>% 
   filter(country=="Malawi")
 
+# kenya has nairobi wanting white nets, but shzone variable is all blue nets we have shzone in the region file but we'll drop it here.
 ken <- region %>% 
-  filter(country=="Kenya")
+  filter(country=="Kenya" & is.na(district))
 
 mad <- region %>% 
   filter(country=="Madagascar")
 
-sl <- region %>% 
+sle <- region %>% 
   filter(country=="Sierra")
 
 rwa  <-  region %>% 
   filter(country=="Rwanda")
-```
-
-```{r burkina, eval=FALSE}
-bf <- dhs_data(countryIds = "BF",
-              indicatorIds = "FE_FRTR_W_A15",
-              surveyYearStart = 2017,
-              breakdown = "subnational") %>% 
-  mutate(region = base::iconv (CharacteristicLabel, to="ASCII//TRANSLIT"),
-         region = gsub("'", '', region),
-         region = gsub("-", ' ', region),
-         region = tolower(region),
-         region = gsub("\\(including ouagadougou\\)", '', region),
-         region = gsub("hauts bas", 'hauts-bas', region),)
-
-# get our related spatial data frame object
-spbf <- download_boundaries(surveyId = bf$SurveyId[1], method = "sf")
-
-# bfshp<-list.files("rdhs/bf_sdr_subnational_boundaries_2022-01-11/shps/", pattern = ".shp$",full.names=TRUE)
-```
-
-``` {r liberia, eval=FALSE}
-lb <- dhs_data(countryIds = "LB",
-              indicatorIds = "FE_FRTR_W_A15",
-              surveyYearStart = 2019,
-              breakdown = "subnational") %>% 
-  mutate(region = base::iconv (CharacteristicLabel, to="ASCII//TRANSLIT"),
-         region = gsub("'", '', region),
-         region = tolower(region))
-
-
-# get our related spatial data frame object
-splb <- download_boundaries(surveyId = lb$SurveyId[1], method = "sf")
-# lbshp<-list.files("rdhs/lb_subnational_boundaries_2022-01-11/shps/", pattern = ".shp$",full.names=TRUE)
-```
-
-``` {r guinea, eval=FALSE}
-gn <- dhs_data(countryIds = "GN",
-              indicatorIds = "FE_FRTR_W_A15",
-              surveyYearStart = 2018,
-              breakdown = "subnational") %>% 
-  mutate(region = base::iconv (CharacteristicLabel, to="ASCII//TRANSLIT"),
-         region = gsub("'", '', region),
-         region = tolower(region))
-
-
-# get our related spatial data frame object
-spgn <- download_boundaries(surveyId = gn$SurveyId[1], method = "sf")
-# gnshp<-list.files("rdhs/gn_subnational_boundaries_2022-01-11/shps/", pattern = ".shp$",full.names=TRUE)
-
-```
-
-``` {r guinea21, eval=FALSE}
-gn21 <- dhs_data(countryIds = "GN",
-              indicatorIds = "FE_FRTR_W_A15",
-              surveyYearStart = 2021,
-              breakdown = "subnational") %>% 
-  mutate(region = base::iconv (CharacteristicLabel, to="ASCII//TRANSLIT"),
-         region = gsub("'", '', region),
-         region = tolower(region))
-
-
-# get our related spatial data frame object
-spgn21 <- download_boundaries(surveyId = gn21$SurveyId[1], method = "sf")
-# gnshp<-list.files("rdhs/gn_subnational_boundaries_2022-01-11/shps/", pattern = ".shp$",full.names=TRUE)
-
-```
-
-``` {r mali, eval=FALSE}
-ml <- dhs_data(countryIds = "ML",
-              indicatorIds = "ML_NETP_H_MOS",
-              surveyYearStart = 2021,
-              breakdown = "subnational") %>% 
-  mutate(region = base::iconv (CharacteristicLabel, to="ASCII//TRANSLIT"),
-         region = gsub("'", '', region),
-         region = tolower(region)) %>% 
-  filter(region %in% c("..kayes","..koulikoro","..sikasso","..segou","..mopti","....tombouctou","....gao","....kidal","bamako")) %>% 
-  mutate(region = gsub("[..]","",region))
-
-
-# get our related spatial data frame object
-spml <- download_boundaries(surveyId = ml$SurveyId[1], method = "sf")
-# gnshp<-list.files("rdhs/gn_subnational_boundaries_2022-01-11/shps/", pattern = ".shp$",full.names=TRUE)
-
 ```
 
 
@@ -343,292 +229,206 @@ rw <- dhs_data(countryIds = "RW",
 
 
 # get our related spatial data frame object
-sprw <- download_boundaries(surveyId = rw$SurveyId[1], method = "sf") %>% 
-  filter(SVYYEAR==2013)
+sprw <- download_boundaries(surveyId = rw$SurveyId[1], method = "sf") 
+# sprw <- pluck(which(sprw$sdr_subnational_boundaries$SVYYEAR==2013))
+
+# sprw <- sprw$sdr_subnational_boundaries %>%
+#   filter(SVYYEAR==2013)
 
 # rwshp<-list.files("rdhs/rw_sdr_subnational_boundaries_2022-01-11/shps/", pattern = ".shp$",full.names=TRUE)
 ```
 
-``` {r sfread, eval=FALSE}
-#read the shapefile. Alternatively make an assignment, such as f<-sf::read_sf(your_SHP_file)
-# sprw <- sf::read_sf(rwshp)
-# spgn <- sf::read_sf(gnshp)
-# splb <- sf::read_sf(lbshp)
-# spbf <- sf::read_sf(bfshp)
+``` {r sierraleone, eval=FALSE}
+# using 2019 instead of 2016 file as 2016 doesn't have a boundaries associated with it (list of 0). 
+sl1 <- dhs_data(countryIds = "SL",
+              indicatorIds = "FE_FRTR_W_A15",
+              surveyYear = 2019, 
+              breakdown = "subnational") %>% 
+  mutate(region = base::iconv (CharacteristicLabel, to="ASCII//TRANSLIT"),
+         region = gsub("'", '', region),
+         region = tolower(region),
+         region = word(region))
+
+
+# get our related spatial data frame object by using the surveyID in the first row of the sl dataframe
+spsl <- download_boundaries(surveyId = sl1$SurveyId[1], method = "sf") 
+```
+
+``` {r kenya, eval=FALSE}
+ke1 <- dhs_data(countryIds = "KE",
+              indicatorIds = "FE_FRTR_W_A15",
+              surveyYear = 2014, 
+              breakdown = "subnational") %>% 
+  mutate(region = base::iconv (CharacteristicLabel, to="ASCII//TRANSLIT"),
+         region = gsub("'", '', region),
+         region = tolower(region),
+         region = word(region))
+
+
+# get our related spatial data frame object by using the surveyID in the first row of the dataframe
+spke <- download_boundaries(surveyId = ke1$SurveyId[1], method = "sf") 
+```
+
+``` {r malawi, eval=FALSE}
+mw1 <- dhs_data(countryIds = "MW",
+              indicatorIds = "FE_FRTR_W_A15",
+              surveyYear = 2010, 
+              breakdown = "subnational") %>% 
+  mutate(region = base::iconv (CharacteristicLabel, to="ASCII//TRANSLIT"),
+         region = gsub("'", '', region),
+         region = tolower(region),
+         region = word(region))
+
+
+# get our related spatial data frame object by using the surveyID in the first row of the  dataframe
+spmw <- download_boundaries(surveyId = mw1$SurveyId[1], method = "sf") 
 ```
 
 
 ```{r regjoins, eval=FALSE}
-# gn <- reg %>%
-#   filter(datafile=="GNHR71") %>%
-#   left_join(gn, by = "region") %>%
-#   mutate(diffuse = (percent_of_polyester_nets_used-percent_of_polyethylene_nets_used),
-#          diffuse2 = ifelse(p_value_crudeuse < 0.05, diffuse, NA),
-#          diff = if_else(p_value_crudeuse > 0.05, -1, diffuse),
-#     diff = cut(diff, breaks = c(-2, 0, 5, 10, 15, Inf)),
-#     diff = fct_recode(diff, "no difference" = "(-2,0]",
-#                       "<5 pts" = "(0,5]",
-#                       "5-9.9 pts" = "(5,10]",
-#                       "10-15 pts" = "(10,15]",
-#                       "15+ pts" = "(15,Inf]"),
-#     aor = ifelse(pval_aor < 0.05, aor_for_textile, NA))
-
-
-
-
 rw <- rwa %>% 
   mutate(region=tolower(region)) %>% 
   left_join(rw, by = "region") %>% 
-  filter(SurveyYearLabel==2013)
+  filter(SurveyYearLabel==2013) ## some issues with Rwanda pulling two years of surveys from the boundaries file.
 
 
+sl <- sle %>% 
+  mutate(region=tolower(region),
+         region=word(region)) %>% 
+  left_join(sl1, by = "region")
 
+ke <- ken %>% 
+  mutate(region=tolower(region),
+         region=word(region)) %>% 
+  left_join(ke1, by = "region") %>% 
+  filter(DataId!=1761649) # an extra copy of Nairobi was in there, not sure why. Retained 1761650 instead.
 
+mw <- mlw %>% 
+  drop_na(district) %>% 
+  mutate(region=tolower(region),
+         region=paste0("..",region),
+         region=case_when(region=="..nkhatabay" ~ "..nkhata",
+                          region=="..nkhota kota" ~ "..nkhotakota",
+                          TRUE ~ as.character(region))) %>% 
+         # region=word(region),
+         # region=case_when(region=="north" ~ "northern",
+         #                  region=="south" ~ "southern",
+                          # TRUE ~ as.character(region))) %>% 
+  left_join(mw1, by = "region") %>% 
+  mutate(region=gsub("\\.\\.", '', region),
+         region=case_when(region=="nkhata" ~ "nkhatabay",
+                          region=="nkhotakota" ~ "nkhota kota",
+                          TRUE ~ as.character(region)))
+# %>% 
+#   mutate(region=gsub("..", '', region))
 ```
 
 ```{r joiningstuff, eval=FALSE}
 
-
-
 mrw <- rw$color[match(sprw$sdr_subnational_boundaries$REG_ID, rw$RegionId)]
 sprw$sdr_subnational_boundaries$color <- mrw
 
+msl <- sl$color[match(spsl$sdr_subnational_boundaries$REG_ID, sl$RegionId)]
+spsl$sdr_subnational_boundaries$color <- msl
 
+mke <- ke$color[match(spke$sdr_subnational_boundaries$REG_ID, ke$RegionId)]
+spke$sdr_subnational_boundaries$color <- mke
 
-
+mmw <- mw$color[match(spmw$sdr_subnational_boundaries2$REGNAME, mw$region)]
+spmw$sdr_subnational_boundaries2$color <- mmw
 
 
 ```
 
+<h2>Preferred colors for nets by region</h2>
+The majority preferred net color by region (Kenya, Sierra Leone, Rwanda) or district (Malawi 2010) is presented in maps in Fig. \@ref(fig:regmapscolor). Blue was the predominantly preferred color except in the capital areas of Kenya (Nairobi) and Rwanda (Kigali). Malawi 2010 data were collected at both zonal and district level, with a few districts preferring green over blue nets, but when looking only at the zonal level, blue was the preferred color for all zones in all four surveys.
 
-
-```{r regmapsdiffuse2, eval=FALSE, fig.cap="Regional maps of the crude difference in polyester vs polyethylene net use. Blue indicates more polyester nets are used than polyethylene nets; red indicates more polyethylene nets are used.", fig.topcaption=TRUE}
+```{r regmapscolor, eval=FALSE, fig.cap="Regional maps of the majority-preferred color for ITNs.", fig.topcaption=TRUE}
 
 # if having an error discrete/cont scale here, check if the Stata do file has been run for these countries.
 
-# g1 <- ggplot(spbf$sdr_subnational_boundaries) +
-#   geom_sf(aes(fill = diffuse2), color = "lightgray") +
-#   theme_void() +
-#   scale_fill_distiller(palette = "RdBu", direction = 1,
-#     na.value = "whitesmoke",
-#     limits = c(-35,35)) +
-#   labs(
-#     fill = "Use difference",
-#     color = "",
-#     title = "Burkina Faso 2018",
-#     caption = ""
-#   ) +
-#   theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
-# 
-# g2 <- ggplot(spgn$sdr_subnational_boundaries) +
-#   geom_sf(aes(fill = diffuse2), color = "lightgray") +
-#  theme_void() +
-#    scale_fill_distiller(palette = "RdBu", direction = 1,
-#     na.value = "whitesmoke",
-#     limits = c(-35,35)) +
-#   labs(
-#     fill = "Use difference",
-#     color = "",
-#     title = "Guinea 2018",
-#     caption = ""
-#   ) +
-#   theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
-# 
-# g21 <- ggplot(spgn21$sdr_subnational_boundaries) +
-#   geom_sf(aes(fill = diffuse2), color = "lightgray") +
-#  theme_void() +
-#    scale_fill_distiller(palette = "RdBu", direction = 1,
-#     na.value = "whitesmoke",
-#     limits = c(-35,35)) +
-#   labs(
-#     fill = "Use difference",
-#     color = "",
-#     title = "Guinea 2021",
-#     caption = ""
-#   ) +
-#   theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
-# 
-# 
-# g3 <- ggplot(splb$sdr_subnational_boundaries) +
-#   geom_sf(aes(fill = diffuse2), color = "lightgray") +
-#  theme_void() +
-#  scale_fill_distiller(palette = "RdBu", direction = 1,
-#     na.value = "whitesmoke",
-#     limits = c(-35,35)) +
-#   labs(
-#     fill = "Use difference",
-#     color = "",
-#     title = "Liberia 2019",
-#     caption = ""
-#   ) +
-#   theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
-
-
-
-ggplot(sprw$sdr_subnational_boundaries) +
+# Rwanda
+rmap <- ggplot(sprw$sdr_subnational_boundaries) +
   geom_sf(aes(fill = as.factor(color)), color = "lightgray") +
  theme_void() +
- # scale_fill_manual(values = colorpal,
- #    na.value = "whitesmoke") +
-  # labs(
-  #   fill = "Most preferred net color",
-  #   color = "",
-  #   title = "Rwanda",
-  #   caption = ""
-  # ) +
+ scale_fill_manual(values = colorpal,
+    na.value = "tan") +
+  labs(
+    fill = "Most preferred net color",
+    color = "",
+    title = "Rwanda 2013",
+    subtitle = "Kigali prefers white nets; ignore 2017 data"
+  ) +
   # geom_sf_label(aes(label = "REGNAME"), size=.5) +
-  theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
+  theme(legend.position="none") +
+  facet_wrap(sprw$sdr_subnational_boundaries$SVYYEAR)
+
+# Malawi
+mmap <- ggplot(spmw$sdr_subnational_boundaries2) +
+  geom_sf(aes(fill = as.factor(color)), color = "lightgray") +
+ theme_void() +
+ scale_fill_manual(values = colorpal,
+    na.value = "tan") +
+  labs(
+    fill = "Most preferred net color",
+    color = "",
+    title = "Malawi 2010",
+    subtitle = "In Malawi 2012, 2014, and 2017,\nblue was the preferred color for\nSouthern, Northern, and Central"
+  ) +
+  # geom_sf_text(aes(label = spmw$sdr_subnational_boundaries2$DHSREGEN), size=1.5) +
+  theme(legend.position="none") 
+
+# Sierra Leone -
+smap <- ggplot(spsl$sdr_subnational_boundaries) +
+  geom_sf(aes(fill = as.factor(color)), color = "lightgray") +
+ theme_void() +
+ scale_fill_manual(values = colorpal,
+    na.value = "#5587C9") + # northwestern province did not exist in 2016, but we are using 2019 boundaries. assuming blue is the preferred color there
+  labs(
+    fill = "Most preferred net color",
+    color = "",
+    title = "Sierra Leone 2016",
+    caption = ""
+  ) +
+  # geom_sf_label(aes(label = "REGNAME"), size=.5) +
+  theme(legend.position="none")
+
+# Kenya - using DHS regions for MIS survey, 
+# TODO: Kenya map na.color is blue because i need to fix region names??
+
+kmap <- ggplot(spke$sdr_subnational_boundaries) +
+  geom_sf(aes(fill = as.factor(color)), color = "lightgray") +
+ theme_void() +
+ scale_fill_manual(values = colorpal,
+    na.value = "tan") +
+  labs(
+    fill = "Most preferred net color",
+    color = "",
+    title = "Kenya",
+    subtitle = "Only Nairobi preferred white nets",
+    caption = ""
+  ) +
+  # geom_sf_label(aes(label = ifelse(spke$sdr_subnational_boundaries$color=="white",REGNAME,"")), size=1.5) +
+  theme(legend.position="none")
 
 
+# plot.margin = grid::unit(c(0, 0, 0, 0), "null"),
 
-text <- paste("Blue indicates polyester nets are used more;",
-"red indicates that polyethylene nets are used more", sep = "\n")
+plot_grid(kmap, smap, rmap, mmap)
 
-gt <- text_grob(text, just="center")
 
-# plot_grid(g1, g21, g3, g4)
-
-# gn %>% 
-#   ggplot(spgn$sdr_subnational_boundaries) +
-#   geom_sf(aes(fill = diff))
 ```
 
 
 
-```{r regmapsaor, eval=FALSE, fig.cap="Regional maps of the coefficient for textile in the adjusted model at regional level. Blue indicates polyethylene nets are less likely to be used than polyester nets; red indicates a higher likelihood that polyethylene nets are used.", fig.topcaption=TRUE}
+
+<h2>Forestplot of odds of a white net being used (vs other colors)</h2>
 
 
-ga1 <- ggplot(spbf$sdr_subnational_boundaries) +
-  geom_sf(aes(fill = aor), color = "lightgray") +
-  theme_void() +
-  scale_fill_gradient2(
-    low = "lightblue",
-    mid = "ghostwhite",
-    high = "lightcoral",
-    midpoint = 1.0,
-    limits = c(0,3),
-    na.value = "WhiteSmoke"
-  ) +
-  labs(
-    fill = "Adjusted Odds Ratio",
-    color = "",
-    title = "Burkina Faso 2018",
-    caption = ""
-  ) +
-  theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
+```{r, eval=FALSE, layout="l-body-outset", fig.cap = "Forest Plot summarizing odds of a white net being used; most recent survey per country", fig.topcaption=TRUE}
+include_graphics("images/_colorforestplot.png")
 
-ga2 <- ggplot(spgn$sdr_subnational_boundaries) +
-  geom_sf(aes(fill = aor), color = "lightgray") +
- theme_void() +
-    scale_fill_gradient2(
-    low = "lightblue",
-    mid = "ghostwhite",
-    high = "lightcoral",
-    midpoint = 1.0,
-    limits = c(0,3),
-    na.value = "WhiteSmoke"
-  ) +
-  labs(
-    fill = "Adjusted Odds Ratio",
-    color = "",
-    title = "Guinea 2018",
-    caption = ""
-  ) +
-  theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
-
-ga21 <- ggplot(spgn21$sdr_subnational_boundaries) +
-  geom_sf(aes(fill = aor), color = "lightgray") +
- theme_void() +
-    scale_fill_gradient2(
-    low = "lightblue",
-    mid = "ghostwhite",
-    high = "lightcoral",
-    midpoint = 1.0,
-    limits = c(0,3),
-    na.value = "WhiteSmoke"
-  ) +
-  labs(
-    fill = "Adjusted Odds Ratio",
-    color = "",
-    title = "Guinea 2021",
-    caption = ""
-  ) +
-  theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
-
-ga3 <- ggplot(splb$sdr_subnational_boundaries) +
-  geom_sf(aes(fill = aor), color = "lightgray") +
- theme_void() +
-  scale_fill_gradient2(
-    low = "lightblue",
-    mid = "ghostwhite",
-    high = "lightcoral",
-    midpoint = 1.0,
-   limits = c(0,3),
-    na.value = "WhiteSmoke"
-  ) +
-  labs(
-    fill = "Adjusted Odds Ratio",
-    color = "",
-    title = "Liberia 2019",
-    caption = ""
-  ) +
-  theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
-
-
-
-ga4 <- ggplot(sprw$sdr_subnational_boundaries) +
-  geom_sf(aes(fill = percent_preferred), color = "lightgray") +
- theme_void() +
- # scale_fill_gradient2(
- #    low = "lightblue",
- #    mid = "ghostwhite",
- #    high = "lightcoral",
- #    midpoint = 1.0,
- #   limits = c(0,3),
- #    na.value = "WhiteSmoke"
- #  ) +
-  labs(
-    fill = "Preferred net color",
-    color = "",
-    title = "Rwanda",
-    caption = ""
-  ) +
-  theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
-
-ga5 <- ggplot(spml$sdr_subnational_boundaries) +
-  geom_sf(aes(fill = aor), color = "lightgray") +
- theme_void() +
- scale_fill_gradient2(
-    low = "lightblue",
-    mid = "ghostwhite",
-    high = "lightcoral",
-    midpoint = 1.0,
-   limits = c(0,3),
-    na.value = "WhiteSmoke"
-  ) +
-  labs(
-    fill = "Adjusted Odds Ratio",
-    color = "",
-    title = "Mali 2021",
-    caption = ""
-  ) +
-  theme(plot.margin = grid::unit(c(0, 0, 0, 0), "null"))
-
-plot_grid(ga1, ga21, ga3, ga4)
-
-# gn %>% 
-#   ggplot(spgn$sdr_subnational_boundaries) +
-#   geom_sf(aes(fill = diff))
-```
-
-```{r}
-# geo_facet plot for each country, with a legend floating in the ocean, of the AOR for textile, at regional level
-```
-
-
-
-```{r, eval=FALSE, layout="l-body-outset", fig.cap = "Forest Plot summarizing odds of a PE net being used; most recent survey per country", fig.topcaption=TRUE}
-include_graphics("images/_textileforestplot.png")
+#TODO: write Stata code (update textile forestplot code) for a net color forest plot
 ```
 
 <h2>8. Conclusions</h2>
