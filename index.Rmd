@@ -260,6 +260,7 @@ sl1 <- dhs_data(countryIds = "SL",
 
 # get our related spatial data frame object by using the surveyID in the first row of the sl dataframe
 spsl <- download_boundaries(surveyId = sl1$SurveyId[1], method = "sf") 
+Sys.sleep(10)
 ```
 
 ``` {r kenya}
@@ -275,6 +276,7 @@ ke1 <- dhs_data(countryIds = "KE",
 
 # get our related spatial data frame object by using the surveyID in the first row of the dataframe
 spke <- download_boundaries(surveyId = ke1$SurveyId[1], method = "sf") 
+Sys.sleep(10)
 ```
 
 ``` {r malawi}
@@ -290,6 +292,7 @@ mw1 <- dhs_data(countryIds = "MW",
 
 # get our related spatial data frame object by using the surveyID in the first row of the  dataframe
 spmw <- download_boundaries(surveyId = mw1$SurveyId[1], method = "sf") 
+Sys.sleep(10)
 ```
 
 
@@ -429,7 +432,10 @@ plot_grid(kmap, smap, rmap, mmap)
 
 
 
-<h2>Forestplot of odds of a white net being used (vs other colors)</h2>
+```{r}
+# <h2>Forestplot of odds of a white net being used (vs other colors)</h2>
+# TODO: Maybe do this later.
+```
 
 
 ```{r, eval=FALSE, layout="l-body-outset", fig.cap = "Forest Plot summarizing odds of a white net being used; most recent survey per country", fig.topcaption=TRUE}
