@@ -25,7 +25,7 @@ library(ggpubr)
 library(todor)
 library(flextable)
 library(rdhs)
-
+library(english)
 theme_set(theme_classic())
 
 
@@ -83,6 +83,10 @@ regs <- read_dta("../Color/output/color_logistic.dta") %>%
 cregs <- regs %>% 
   filter(var %in% c("blue", "green", "other", "unknown"))
 
+ct <- use %>% 
+  filter(color=="blue") %>% 
+  select(dataset, country, countrysurvey)
+
 ```
 
 ```{r worldmap}
@@ -98,7 +102,7 @@ crs_africa <-  st_crs(africa) # not sure this is used later.
 ```
 
 <h1>Summary</h1>
-Data from the most recent MIS and DHS were obtained with permission from dhsprogram.com. MICS surveys do not collect net color nor preferences. Only `r length(unique(use$dataset))` surveys from `r length(unique(use$country))` countries recorded net color; `r length(unique(prefs$dataset))` surveys from `r length(unique(prefs$country))` countries recorded color preferences at household level. In four Malawi surveys both net color and color preferences were recorded, allowing for additional analysis on whether nets of the household's preferred color are used at higher rates than nets of the non-preferred color.
+Data from the most recent MIS and DHS were obtained with permission from dhsprogram.com. MICS surveys do not collect net color nor preferences. Only `r words(length(unique(use$dataset)))` surveys from `r words(length(unique(use$country)))` countries recorded net color; `r words(length(unique(prefs$dataset)))` surveys from `r words(length(unique(prefs$country)))` countries recorded color preferences at household level. In four Malawi surveys both net color and color preferences were recorded, allowing for additional analysis on whether nets of the household's preferred color are used at higher rates than nets of the non-preferred color.
 
 <h2>Preferred colors for nets</h2>
 
@@ -136,12 +140,13 @@ use %>%
        fill="")
 ```
 
-Figure \@ref(fig:figreg) shows the odds of non-white nets being used the previous night (vs white nets being used), controlling for other factors that affect ITN use, including time of the year, region, wealth quintile, urban/rural, household net supply, and age of the net. Blue nets were less likely to be used than white nets in Madagascar, Nigeria, and the three Tanzania surveys. Blue nets were more likely to be used in the 2010 and 2012 Malawi surveys, but were not used differently in the 2014 and 2017 surveys. Green nets had the same odds of being used as white nets in all surveys. Findings are also summarized in Table \@ref(tab:tabreg).
+Figure \@ref(fig:figreg) shows the odds of non-white nets being used the previous night (vs white nets being used), controlling for other factors that affe= ITN use, including time of the year, region, wealth quintile, urban/rural, household net supply, and age of the net. Blue nets were less likely to be used than white nets in Madagascar, Nigeria, and the three Tanzania surveys. Blue nets were more likely to be used in the 2010 and 2012 Malawi surveys, but were not used differently in the 2014 and 2017 surveys. Green nets had the same odds of being used as white nets in all surveys. Findings are also summarized in Table \@ref(tab:tabreg).
 
 ```{r figreg, fig.cap="Odds of a net being used the previous night, by color, controlling for other key factors"}
 cregs %>% 
   filter(ub<10) %>% 
   mutate(sig=pval<0.05) %>% 
+  left_join(ct) %>% 
   ggplot() +
   geom_point(aes(x=var, y=odds, color=var, alpha=sig)) +
   geom_linerange(aes(x=var, ymin=lb, ymax=ub, color=var, alpha=sig)) +
@@ -150,15 +155,13 @@ cregs %>%
   scale_color_manual(values=colorpal) +
   scale_alpha_manual(values=c(.3,1)) +
   theme(legend.position = "none") +
-  facet_wrap(~dataset)
+  facet_wrap(~countrysurvey)
 ```
 
 
 ```{r tabreg, tab.cap="Odds of a net being used the previous night, by color, compared to white nets. Results are from a multivariate logistic regression model controlling for household net supply, age of the net, time of year (month), region, wealth quintile, and urban/rural residence."}
 
-ct <- use %>% 
-  filter(color=="blue") %>% 
-  select(dataset, country, countrysurvey)
+
 
 cregscty <- cregs %>% 
   left_join(ct) %>% 
@@ -177,7 +180,8 @@ cregscty %>%
                     green="Green",
                     other="Other",
                     unknown="Unknown color") %>% 
-  add_footer_row(values = "* indicates p-value < 0.05", colwidths = c(6), top = FALSE)
+  add_footer_row(values = "* indicates p-value < 0.05", colwidths = c(6), top = FALSE) %>% 
+  autofit()
 ```
 
 <h2>Preferred colors for nets, by wealth quintile</h2>
@@ -453,14 +457,14 @@ cregsum <- cregscty %>%
 
 
 ```{r}
-
+regscount <- cregscty %>% left_join(ct)
 invisible(todor())
 ```
 
 
 <h2>8. Conclusions</h2>
 
-Data are limited on net color and net color preferences. In the `r length(unique(prefs$country))` countries where respondents have been asked about their preferred net color, in four countries blue was the predominantly preferred color, and one country (Madagascar) preferred white with blue as the second choice. Of the `r length(unique(regs$country))` countries where net color was recorded, blue nets were as likely to be used as white nets in Malawi, Mozambique, and Rwanda, while in Madagascar, Nigeria, and all three Tanzania surveys, blue nets had between `r cregsum %>% slice_min(oo) %>% pull(oo)` and `r cregsum %>% slice_max(oo) %>% pull(oo)` reduced odds of being used, controlling for other factors that influence net use. 
+Data are limited on net color and net color preferences. In the `r words(length(unique(prefs$country)))` countries where respondents have been asked about their preferred net color, in four countries blue was the predominantly preferred color, and one country (Madagascar) preferred white with blue as the second choice. Of the `r words(length(unique(regscount$country)))` countries where net color was recorded, blue nets were as likely to be used as white nets in Malawi, Mozambique, and Rwanda, while in Madagascar, Nigeria, and all three Tanzania surveys, blue nets had between `r cregsum %>% slice_min(oo) %>% pull(oo)` and `r cregsum %>% slice_max(oo) %>% pull(oo)` reduced odds of being used, controlling for other factors that influence net use. 
 
 <h1>Taking into account survey respondents' preferences for nets of a particular color</h1>
 
