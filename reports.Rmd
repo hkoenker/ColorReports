@@ -10,14 +10,12 @@ knitr::opts_chunk$set(echo = FALSE)
 
 # Reports
 
-- [Kenya](files/Kenya_Color_Report.html)
-- [Liberia](files/Liberia_Color_Report.html)
-- [Madagascar](files/Madagascar_Color_Report.html)
-- [Malawi](files/Malawi_Color_Report.html)
-- [Mozambique](files/Mozambique_Color_Report.html)
-- [Nigeria](files/Nigeria_Color_Report.html)
-- [Rwanda](files/Rwanda_Color_Report.html)
-- [Sierra Leone](files/Sierra_Leone_Color_Report.html)
-- [Tanzania](files/Tanzania_Color_Report.html)
+
+- [Madagascar](files/Madagascar 2021_Color_Report.html)
+- [Malawi](files/Malawi 2017_Color_Report.html)
+- [Mozambique](files/Mozambique 2018_Color_Report.html)
+- [Nigeria](files/Nigeria 2015_Color_Report.html)
+- [Rwanda](files/Rwanda 2017_Color_Report.html)
+- [Tanzania](files/Tanzania 2017_Color_Report.html)
 
 
