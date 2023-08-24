@@ -201,7 +201,7 @@ ses %>%
   facet_wrap(~countrysurvey)
 ```
 
-```{r readreg, eval=FALSE}
+```{r readreg}
 region <- read_excel("../Color/output/color_netuse.xls", sheet="Prefs_region"
   ) %>%
   clean_names() %>% 
@@ -226,7 +226,7 @@ rwa  <-  region %>%
 ```
 
 
-``` {r rwanda, eval=FALSE}
+``` {r rwanda}
 rw <- dhs_data(countryIds = "RW",
               indicatorIds = "FE_FRTR_W_A15",
               surveyYear = 2013, 
@@ -246,7 +246,7 @@ sprw <- download_boundaries(surveyId = rw$SurveyId[1], method = "sf")
 # rwshp<-list.files("rdhs/rw_sdr_subnational_boundaries_2022-01-11/shps/", pattern = ".shp$",full.names=TRUE)
 ```
 
-``` {r sierraleone, eval=FALSE}
+``` {r sierraleone}
 # using 2019 instead of 2016 file as 2016 doesn't have a boundaries associated with it (list of 0). 
 sl1 <- dhs_data(countryIds = "SL",
               indicatorIds = "FE_FRTR_W_A15",
@@ -262,7 +262,7 @@ sl1 <- dhs_data(countryIds = "SL",
 spsl <- download_boundaries(surveyId = sl1$SurveyId[1], method = "sf") 
 ```
 
-``` {r kenya, eval=FALSE}
+``` {r kenya}
 ke1 <- dhs_data(countryIds = "KE",
               indicatorIds = "FE_FRTR_W_A15",
               surveyYear = 2014, 
@@ -277,7 +277,7 @@ ke1 <- dhs_data(countryIds = "KE",
 spke <- download_boundaries(surveyId = ke1$SurveyId[1], method = "sf") 
 ```
 
-``` {r malawi, eval=FALSE}
+``` {r malawi}
 mw1 <- dhs_data(countryIds = "MW",
               indicatorIds = "FE_FRTR_W_A15",
               surveyYear = 2010, 
@@ -293,7 +293,7 @@ spmw <- download_boundaries(surveyId = mw1$SurveyId[1], method = "sf")
 ```
 
 
-```{r regjoins, eval=FALSE}
+```{r regjoins}
 rw <- rwa %>% 
   mutate(region=tolower(region)) %>% 
   left_join(rw, by = "region") %>% 
@@ -331,7 +331,7 @@ mw <- mlw %>%
 #   mutate(region=gsub("..", '', region))
 ```
 
-```{r joiningstuff, eval=FALSE}
+```{r joiningstuff}
 
 mrw <- rw$color[match(sprw$sdr_subnational_boundaries$REG_ID, rw$RegionId)]
 sprw$sdr_subnational_boundaries$color <- mrw
@@ -351,7 +351,7 @@ spmw$sdr_subnational_boundaries2$color <- mmw
 <h2>Preferred colors for nets by region</h2>
 The majority preferred net color by region (Kenya, Sierra Leone, Rwanda) or district (Malawi 2010) is presented in maps in Fig. \@ref(fig:regmapscolor). Blue was the predominantly preferred color except in the capital areas of Kenya (Nairobi) and Rwanda (Kigali). Malawi 2010 data were collected at both zonal and district level, with a few districts preferring green over blue nets, but when looking only at the zonal level, blue was the preferred color for all zones in all four surveys.
 
-```{r regmapscolor, eval=FALSE, fig.cap="Regional maps of the majority-preferred color for ITNs.", fig.topcaption=TRUE}
+```{r regmapscolor, fig.cap="Regional maps of the majority-preferred color for ITNs.", fig.topcaption=TRUE}
 
 # if having an error discrete/cont scale here, check if the Stata do file has been run for these countries.
 
@@ -402,7 +402,6 @@ smap <- ggplot(spsl$sdr_subnational_boundaries) +
   theme(legend.position="none")
 
 # Kenya - using DHS regions for MIS survey, 
-# TODO: Kenya map na.color is blue because i need to fix region names??
 
 kmap <- ggplot(spke$sdr_subnational_boundaries) +
   geom_sf(aes(fill = as.factor(color)), color = "lightgray") +
@@ -436,12 +435,19 @@ plot_grid(kmap, smap, rmap, mmap)
 ```{r, eval=FALSE, layout="l-body-outset", fig.cap = "Forest Plot summarizing odds of a white net being used; most recent survey per country", fig.topcaption=TRUE}
 include_graphics("images/_colorforestplot.png")
 
-#TODO: write Stata code (update textile forestplot code) for a net color forest plot
+#TODO: write Stata code (update textile forestplot code) for a net color forest plot meh why bother...
+```
+
+```{r}
+cregsum <- cregscty %>% 
+  filter(pval<0.05 & var=="blue" & odds<1) %>% 
+  mutate(oo=round(100-odds*100, digits=2))
+  
 ```
 
 <h2>8. Conclusions</h2>
 
-Data are limited on net color and net color preferences. 
+Data are limited on net color and net color preferences. In the `r length(unique(prefs$country))` countries where respondents have been asked about their preferred net color, in four countries blue was the predominantly preferred color, and one country (Madagascar) preferred white with blue as the second choice. Of the `r length(unique(regs$country))` countries where net color was recorded, blue nets were as likely to be used as white nets in Malawi, Mozambique, and Rwanda, while in Madagascar, Nigeria, and all three Tanzania surveys, blue nets had between `r cregsum %>% slice_min(oo) %>% pull(oo)` and `r cregsum %>% slice_max(oo) %>% pull(oo)` reduced odds of being used, controlling for other factors that influence net use. 
 
 <h1>Taking into account survey respondents' preferences for nets of a particular color</h1>
 
