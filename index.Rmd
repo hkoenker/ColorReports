@@ -33,7 +33,6 @@ colorpal <- c(blue="#5587C9", white="snow", pink="pink", green="forestgreen", "b
 
 colorpalline <- c(blue="#5587C9", white="grey", pink="pink", green="forestgreen", "blue and white striped"="lightblue", red="firebrick", striped="lightblue", black="dimgrey", other="pink", "don't care/dk"="wheat")
 
-#TODO: set up netlify website for this color analysis
 ```
 
 This website provides [reports](reports.html) for countries in sub-Saharan Africa to evaluate whether there are differences in use of insecticide-treated nets (ITNs) due to the color of ITNs (typically white, blue, green, or other colors).
@@ -227,10 +226,13 @@ sle <- region %>%
 
 rwa  <-  region %>% 
   filter(country=="Rwanda")
+
+mad  <-  region %>% 
+  filter(country=="Madagascar")
 ```
 
 
-``` {r rwanda}
+``` {r rwanda, cache=TRUE}
 rw <- dhs_data(countryIds = "RW",
               indicatorIds = "FE_FRTR_W_A15",
               surveyYear = 2013, 
@@ -250,6 +252,24 @@ sprw <- download_boundaries(surveyId = rw$SurveyId[1], method = "sf")
 # rwshp<-list.files("rdhs/rw_sdr_subnational_boundaries_2022-01-11/shps/", pattern = ".shp$",full.names=TRUE)
 ```
 
+``` {r madagascar, cache=TRUE}
+md1 <- dhs_data(countryIds = "MD",
+              indicatorIds = "FE_FRTR_W_A15",
+              surveyYear = 2016, 
+              breakdown = "subnational") %>% 
+  mutate(region = base::iconv (CharacteristicLabel, to="ASCII//TRANSLIT"),
+         region = gsub("'", '', region),
+         region = tolower(region),
+         region=case_when(region=="subdesertique" ~ "sub-desert",
+                          region=="hauts plateaux" ~ "high",
+                          TRUE ~ as.character(region)))
+
+
+# get our related spatial data frame object
+spmd <- download_boundaries(surveyId = md1$SurveyId[1], method = "sf") 
+Sys.sleep(10)
+```
+
 ``` {r sierraleone}
 # using 2019 instead of 2016 file as 2016 doesn't have a boundaries associated with it (list of 0). 
 sl1 <- dhs_data(countryIds = "SL",
@@ -267,7 +287,7 @@ spsl <- download_boundaries(surveyId = sl1$SurveyId[1], method = "sf")
 Sys.sleep(10)
 ```
 
-``` {r kenya}
+``` {r kenya, cache=TRUE}
 ke1 <- dhs_data(countryIds = "KE",
               indicatorIds = "FE_FRTR_W_A15",
               surveyYear = 2014, 
@@ -283,7 +303,7 @@ spke <- download_boundaries(surveyId = ke1$SurveyId[1], method = "sf")
 Sys.sleep(10)
 ```
 
-``` {r malawi}
+``` {r malawi, cache=TRUE}
 mw1 <- dhs_data(countryIds = "MW",
               indicatorIds = "FE_FRTR_W_A15",
               surveyYear = 2010, 
@@ -306,6 +326,10 @@ rw <- rwa %>%
   left_join(rw, by = "region") %>% 
   filter(SurveyYearLabel==2013) ## some issues with Rwanda pulling two years of surveys from the boundaries file.
 
+md <- mad %>% 
+  mutate(region=tolower(region),
+         region=word(region)) %>% 
+  left_join(md1, by = "region")
 
 sl <- sle %>% 
   mutate(region=tolower(region),
@@ -352,7 +376,8 @@ spke$sdr_subnational_boundaries$color <- mke
 mmw <- mw$color[match(spmw$sdr_subnational_boundaries2$REGNAME, mw$region)]
 spmw$sdr_subnational_boundaries2$color <- mmw
 
-
+mmd <- md$color[match(spmd$sdr_subnational_boundaries$REG_ID, md$RegionId)]
+spmd$sdr_subnational_boundaries$color <- mmd
 ```
 
 <h2>Preferred colors for nets by region</h2>
@@ -364,7 +389,7 @@ The majority preferred net color by region (Kenya, Sierra Leone, Rwanda) or dist
 
 # Rwanda
 rmap <- ggplot(sprw$sdr_subnational_boundaries) +
-  geom_sf(aes(fill = as.factor(color)), color = "lightgray") +
+  geom_sf(aes(fill = as.factor(color)), color = "dimgrey") +
  theme_void() +
  scale_fill_manual(values = colorpal,
     na.value = "tan") +
@@ -375,12 +400,27 @@ rmap <- ggplot(sprw$sdr_subnational_boundaries) +
     subtitle = "Kigali prefers white nets; ignore 2017 data"
   ) +
   # geom_sf_label(aes(label = "REGNAME"), size=.5) +
-  theme(legend.position="none") +
+  theme(legend.position="right") +
   facet_wrap(sprw$sdr_subnational_boundaries$SVYYEAR)
+
+# Madagascar
+mdmap <- ggplot(spmd$sdr_subnational_boundaries) +
+  geom_sf(aes(fill = as.factor(color)), color = "dimgrey") +
+ theme_void() +
+ scale_fill_manual(values = colorpal,
+    na.value = "tan") +
+  labs(
+    fill = "Most preferred net color",
+    color = "",
+    title = "Madagascar 2016",
+    subtitle = "Blue preferred only in southern area,\ntan areas were not surveyed"
+  ) +
+  # geom_sf_label(aes(label = "REGNAME"), size=.5) +
+  theme(legend.position="right")
 
 # Malawi
 mmap <- ggplot(spmw$sdr_subnational_boundaries2) +
-  geom_sf(aes(fill = as.factor(color)), color = "lightgray") +
+  geom_sf(aes(fill = as.factor(color)), color = "dimgrey") +
  theme_void() +
  scale_fill_manual(values = colorpal,
     na.value = "tan") +
@@ -388,14 +428,14 @@ mmap <- ggplot(spmw$sdr_subnational_boundaries2) +
     fill = "Most preferred net color",
     color = "",
     title = "Malawi 2010",
-    subtitle = "In Malawi 2012, 2014, and 2017,\nblue was the preferred color for\nSouthern, Northern, and Central"
+    caption = "In Malawi 2012, 2014, and 2017, blue was the\npreferred color for Southern, Northern, and Central zones"
   ) +
   # geom_sf_text(aes(label = spmw$sdr_subnational_boundaries2$DHSREGEN), size=1.5) +
-  theme(legend.position="none") 
+  theme(legend.position="left") 
 
 # Sierra Leone -
 smap <- ggplot(spsl$sdr_subnational_boundaries) +
-  geom_sf(aes(fill = as.factor(color)), color = "lightgray") +
+  geom_sf(aes(fill = as.factor(color)), color = "dimgrey") +
  theme_void() +
  scale_fill_manual(values = colorpal,
     na.value = "#5587C9") + # northwestern province did not exist in 2016, but we are using 2019 boundaries. assuming blue is the preferred color there
@@ -406,12 +446,12 @@ smap <- ggplot(spsl$sdr_subnational_boundaries) +
     caption = ""
   ) +
   # geom_sf_label(aes(label = "REGNAME"), size=.5) +
-  theme(legend.position="none")
+  theme(legend.position="right")
 
 # Kenya - using DHS regions for MIS survey, 
 
 kmap <- ggplot(spke$sdr_subnational_boundaries) +
-  geom_sf(aes(fill = as.factor(color)), color = "lightgray") +
+  geom_sf(aes(fill = as.factor(color)), color = "dimgrey") +
  theme_void() +
  scale_fill_manual(values = colorpal,
     na.value = "tan") +
@@ -423,18 +463,35 @@ kmap <- ggplot(spke$sdr_subnational_boundaries) +
     caption = ""
   ) +
   # geom_sf_label(aes(label = ifelse(spke$sdr_subnational_boundaries$color=="white",REGNAME,"")), size=1.5) +
-  theme(legend.position="none")
+  theme(legend.position="right")
 
 
 # plot.margin = grid::unit(c(0, 0, 0, 0), "null"),
 
-plot_grid(kmap, smap, rmap, mmap)
+# plot_grid(kmap, rmap, mmap, smap, mdmap)
+
+kmap
+
+
 
 
 ```
 
+```{r}
+mdmap
+```
 
+```{r}
+mmap
+```
 
+```{r}
+rmap
+```
+
+```{r}
+smap
+```
 
 ```{r}
 # <h2>Forestplot of odds of a white net being used (vs other colors)</h2>
@@ -478,7 +535,6 @@ Stated preferences on their own should not be used to justify procurement of net
 
 If survey data are old, incomplete, or if recent mass distributions have involved only nets of a single color and thus the net crop is highly unbalanced, countries may need to collect additional data and/or ensure that a mix of ITNs are distributed in future campaigns. 
 
-<h1>Additional data sources that may be useful for triangulation</h1>
 
 <h2>Redemption rates for campaign ITNs at distribution points - do redemption rates differ for ITNs of different color?</h2>
 
