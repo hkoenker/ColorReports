@@ -40,7 +40,7 @@ This website provides [reports](reports.html) for countries in sub-Saharan Afric
 Some countries may wish to procure ITNs of a particular color, or procure different colors for different areas of the country, to accommodate preferences or to improve ITN use where certain colors may have negative connotations. These reports use large household survey data to evaluate whether there are differences in use between nets of different colors in a particular country, and whether net color is associated with these differences after controlling for other determinants of net use.
 
 
-In a limited number of countries, publicly available surveys have collected information on household preferences for net textile. This data is summarized on the [Preferences](prefs.html) page. Only in Malawi, however, have both net color and preferred net color been recorded in the same survey.
+In a limited number of countries, publicly available surveys have collected information on household preferences for net colors. This data is summarized below. Only in Malawi, however, have both net color and preferred net color been recorded in the same survey.
 
 This work is supported by the Alliance for Malaria Prevention with funding from The Bill & Melinda Gates Foundation.
 
